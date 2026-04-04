@@ -2,7 +2,7 @@ import { configure } from 'quasar/wrappers';
 
 export default configure(() => {
   return {
-    boot: ['axios'],
+    boot: ['axios', 'auth', 'rbac'],
 
     css: ['app.scss'],
 
