@@ -189,6 +189,29 @@ Toda task so e considerada "Done" quando:
 - [x] Testes unitarios implementados (auth + rbac backend + 41 frontend)
 - [x] Nenhum vazamento de dados entre tenants (testado via API)
 
+### Debitos corrigidos na v0.1.1 (04/04/2026)
+
+Apos a entrega da v0.1.0, foram identificados **4 bugs criticos** no frontend e **3 paginas** que ficaram como debito:
+
+**Bugs corrigidos:**
+
+| ID      | Bug                                                     | Severidade | Commit  |
+| ------- | ------------------------------------------------------- | ---------- | ------- |
+| BUG-001 | BaseURL do Axios: `/api` -> `/api/v1`                   | P0         | 23fd2d4 |
+| BUG-002 | rbacService.listPermissions path                        | P0         | 23fd2d4 |
+| BUG-003 | rbacService.updateGroupPermissions payload              | P1         | 23fd2d4 |
+| BUG-004 | PermissionsMatrixPage nao carregava permissoes do grupo | P1         | 23fd2d4 |
+
+**Paginas entregues (debito Sprint 1):**
+
+| ID     | Pagina             | Rota              | Commit  |
+| ------ | ------------------ | ----------------- | ------- |
+| S1-F16 | ProfilePage        | `/profile`        | 7589f38 |
+| S1-F17 | FamilySettingsPage | `/family`         | 7589f38 |
+| S1-F18 | MembersPage        | `/family/members` | 7589f38 |
+
+**Novos services/stores:** `families.service.ts`, `family.store.ts`
+
 ---
 
 ## Sprint 2 - Core Financeiro

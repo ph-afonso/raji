@@ -1,6 +1,6 @@
 # Raji Finance - Referencia da API REST
 
-> **Versao:** 0.1.0 (Sprint 1)  
+> **Versao:** 0.1.1 (Sprint 1)  
 > **Base URL:** `http://localhost:3000/api/v1`  
 > **Swagger UI:** `http://localhost:3000/api/docs`  
 > **Autenticacao:** Bearer Token (JWT)
@@ -803,4 +803,6 @@ As permissoes sao definidas no formato `modulo:acao`. Os modulos e acoes disponi
 ---
 
 _Documentacao gerada por Tatiana Texto — Technical Writer da Raji_  
-_Sprint 1 | 2026-04-04_
+_Sprint 1 | Atualizada em 2026-04-04 (v0.1.1)_
+
+> **Nota v0.1.1:** Os endpoints de Users (`GET/PATCH /users/me`) e Families (`GET /families/me`, `PATCH /families/me`, `GET /families/me/members`) ja existiam no backend desde a v0.1.0, mas agora possuem paginas dedicadas no frontend (ProfilePage, FamilySettingsPage, MembersPage) que consomem esses endpoints diretamente.

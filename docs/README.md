@@ -8,9 +8,10 @@ Indice central da documentacao do projeto Raji Finance. Este arquivo serve como 
 
 ### Produto
 
-| Documento                       | Descricao                                              |
-| ------------------------------- | ------------------------------------------------------ |
-| [Briefing](product/briefing.md) | Visao geral do produto, requisitos e modelo de negocio |
+| Documento                                                 | Descricao                                              |
+| --------------------------------------------------------- | ------------------------------------------------------ |
+| [Briefing](product/briefing.md)                           | Visao geral do produto, requisitos e modelo de negocio |
+| [Test Checklist v0.1.1](product/test-checklist-v0.1.1.md) | Checklist de testes humanizados (112 itens)            |
 
 ### Arquitetura
 
@@ -46,9 +47,10 @@ Indice central da documentacao do projeto Raji Finance. Este arquivo serve como 
 
 ### Releases
 
-| Documento                    | Descricao                     |
-| ---------------------------- | ----------------------------- |
-| [v0.1.0](releases/v0.1.0.md) | Release notes da versao 0.1.0 |
+| Documento                    | Descricao                                              |
+| ---------------------------- | ------------------------------------------------------ |
+| [v0.1.1](releases/v0.1.1.md) | Hotfix: bugs criticos + paginas Perfil/Familia/Membros |
+| [v0.1.0](releases/v0.1.0.md) | Release notes da versao 0.1.0                          |
 
 ---
 

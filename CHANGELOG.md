@@ -5,6 +5,26 @@ Todas as mudancas notaveis deste projeto sao documentadas neste arquivo.
 Baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
 e aderente ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 
+## [0.1.1] - 2026-04-04
+
+### Corrigido
+
+- **BaseURL do frontend** corrigida de `/api` para `/api/v1` — todos os endpoints estavam quebrando por prefixo incorreto
+- **rbacService.listPermissions()** — path corrigido de `/permissions` para `/groups/permissions`
+- **rbacService.updateGroupPermissions()** — payload corrigido de `{ permissions }` para `{ permissionIds }`
+- **PermissionsMatrixPage** — agora carrega permissoes reais do grupo selecionado (antes zerava todas as checkboxes)
+
+### Adicionado
+
+- **ProfilePage** (`/profile`) — pagina para visualizar dados do usuario logado e editar nome
+- **FamilySettingsPage** (`/family`) — informacoes da familia, edicao de nome (apenas owner), lista resumida de membros
+- **MembersPage** (`/family/members`) — QTable com lista de membros, troca de grupo via QSelect
+- **families.service.ts** — novo service frontend (getMyFamily, updateMyFamily, listMembers)
+- **family.store.ts** — novo store Pinia para estado da familia e membros
+- **Router atualizado** — rotas `/profile`, `/family` e `/family/members` apontam para paginas reais
+
+---
+
 ## [0.1.0] - 2026-04-04
 
 ### Adicionado

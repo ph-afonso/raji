@@ -1047,9 +1047,9 @@ graph LR
 
 ---
 
-## Status de Implementacao — Sprint 1
+## Status de Implementacao — Sprint 1 (v0.1.1)
 
-> Atualizado em 2026-04-04
+> Atualizado em 2026-04-04 (v0.1.1)
 
 ### Modulos Backend Implementados
 
@@ -1084,6 +1084,28 @@ graph LR
 | PUT    | `/api/v1/groups/:id/permissions` | RBAC     | Implementado |
 
 **Total: 16 endpoints implementados na Sprint 1.**
+
+### Paginas Frontend Implementadas (v0.1.1)
+
+| Pagina                | Rota              | Store             | Service               | Status          |
+| --------------------- | ----------------- | ----------------- | --------------------- | --------------- |
+| LoginPage             | `/login`          | `auth.store.ts`   | `auth.service.ts`     | Implementado    |
+| RegisterPage          | `/register`       | `auth.store.ts`   | `auth.service.ts`     | Implementado    |
+| ProfilePage           | `/profile`        | `auth.store.ts`   | `users.service.ts`    | **Novo v0.1.1** |
+| FamilySettingsPage    | `/family`         | `family.store.ts` | `families.service.ts` | **Novo v0.1.1** |
+| MembersPage           | `/family/members` | `family.store.ts` | `families.service.ts` | **Novo v0.1.1** |
+| GroupsPage            | `/rbac/groups`    | `rbac.store.ts`   | `rbac.service.ts`     | Implementado    |
+| PermissionsMatrixPage | `/rbac/matrix`    | `rbac.store.ts`   | `rbac.service.ts`     | Implementado    |
+| Error404Page          | `/*`              | -                 | -                     | Implementado    |
+| ForbiddenPage         | -                 | -                 | -                     | Implementado    |
+| PaywallPage           | `/paywall`        | -                 | -                     | Implementado    |
+
+### Novos Services e Stores (v0.1.1)
+
+| Arquivo               | Tipo    | Descricao                                         |
+| --------------------- | ------- | ------------------------------------------------- |
+| `families.service.ts` | Service | getMyFamily, updateMyFamily, listMembers          |
+| `family.store.ts`     | Store   | Estado da familia, membros, acoes de carga/edicao |
 
 ### Modulos Pendentes (Sprints 2-6)
 

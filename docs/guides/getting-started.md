@@ -1,6 +1,6 @@
 # Raji Finance - Guia de Setup para Desenvolvedores
 
-> **Versao:** 0.1.0 (Sprint 1)  
+> **Versao:** 0.1.1 (Sprint 1)  
 > **Ultima atualizacao:** 2026-04-04
 
 ---
@@ -423,5 +423,28 @@ npx husky install
 
 ---
 
+---
+
+## 15. Paginas Disponiveis (v0.1.1)
+
+Apos o login, as seguintes paginas estao disponiveis no frontend:
+
+| Pagina                | Rota              | Descricao                                                        |
+| --------------------- | ----------------- | ---------------------------------------------------------------- |
+| **Login**             | `/login`          | Tela de autenticacao                                             |
+| **Registro**          | `/register`       | Criacao de conta e familia                                       |
+| **Perfil**            | `/profile`        | Ver dados do usuario logado e editar nome                        |
+| **Familia**           | `/family`         | Info da familia, editar nome (apenas owner), resumo de membros   |
+| **Membros**           | `/family/members` | Lista completa de membros com QTable, trocar grupo via QSelect   |
+| **Grupos RBAC**       | `/rbac/groups`    | Gerenciamento de grupos (criar, editar, excluir)                 |
+| **Matriz Permissoes** | `/rbac/matrix`    | Matriz de permissoes editavel por grupo (checkbox)               |
+| **404**               | `/*`              | Pagina de erro para rotas inexistentes                           |
+| **403 (Forbidden)**   | -                 | Exibida quando o usuario nao tem permissao para acessar uma tela |
+| **Paywall**           | `/paywall`        | Placeholder para bloqueio por subscription                       |
+
+> **Nota:** As paginas de Perfil, Familia e Membros foram adicionadas na v0.1.1.
+
+---
+
 _Documentacao gerada por Tatiana Texto — Technical Writer da Raji_  
-_Sprint 1 | 2026-04-04_
+_Sprint 1 | Atualizada em 2026-04-04 (v0.1.1)_
