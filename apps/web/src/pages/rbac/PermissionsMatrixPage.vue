@@ -1,10 +1,10 @@
 <template>
   <q-page padding>
     <div class="row items-center q-mb-md">
-      <div class="text-h5 col">Matriz de Permissoes</div>
+      <div class="text-h5 col">Permissões</div>
     </div>
 
-    <!-- Group selector -->
+    <!-- Seletor de grupo -->
     <div class="row q-mb-lg" style="max-width: 400px">
       <q-select
         v-model="selectedGroupId"
@@ -18,60 +18,89 @@
       />
     </div>
 
-    <q-table
-      v-if="selectedGroupId"
-      :rows="matrixRows"
-      :columns="matrixColumns"
-      row-key="module"
-      flat
-      bordered
-      :loading="loading"
-      hide-pagination
-      :rows-per-page-options="[0]"
-    >
-      <template #body-cell="props">
-        <q-td :props="props">
-          <!-- Module name column -->
-          <template v-if="props.col.name === 'module'">
-            <span class="text-weight-bold">{{ tModule(props.value) }}</span>
-          </template>
-          <!-- Action checkbox columns -->
-          <template v-else>
-            <q-checkbox
-              v-if="hasAction(props.row.module, props.col.name)"
-              :model-value="isChecked(props.row.module, props.col.name)"
-              :disable="isMasterGroup"
-              @update:model-value="togglePermission(props.row.module, props.col.name)"
-            />
-            <span v-else class="text-grey-5">--</span>
-          </template>
-        </q-td>
+    <!-- Banner Master -->
+    <q-banner v-if="isMasterGroup" class="bg-blue-1 text-blue-9 q-mb-md" rounded>
+      <template #avatar>
+        <q-icon name="shield" color="blue" />
       </template>
-    </q-table>
+      O grupo <strong>Administrador</strong> possui todas as permissões e não pode ser editado.
+    </q-banner>
 
-    <div v-if="selectedGroupId" class="q-mt-md row justify-end">
+    <!-- Loading -->
+    <div v-if="loading" class="row justify-center q-pa-xl">
+      <q-spinner-dots size="40px" color="primary" />
+    </div>
+
+    <!-- Accordions de módulos -->
+    <q-list v-if="selectedGroupId && !loading" bordered separator class="rounded-borders">
+      <q-expansion-item
+        v-for="mod in modules"
+        :key="mod"
+        :icon="moduleIcons[mod] || 'folder'"
+        :label="tModule(mod)"
+        :caption="moduleCaption(mod)"
+        header-class="text-weight-medium"
+        expand-icon-class="text-primary"
+      >
+        <q-card>
+          <q-card-section class="q-pt-none">
+            <div class="row q-gutter-md q-pt-sm">
+              <div v-for="action in getModuleActions(mod)" :key="action" class="col-auto">
+                <q-checkbox
+                  :model-value="isChecked(mod, action)"
+                  :label="tAction(action)"
+                  :disable="isMasterGroup"
+                  color="primary"
+                  @update:model-value="togglePermission(mod, action)"
+                />
+              </div>
+            </div>
+          </q-card-section>
+        </q-card>
+      </q-expansion-item>
+    </q-list>
+
+    <!-- Placeholder quando nenhum grupo selecionado -->
+    <div v-if="!selectedGroupId && !loading" class="text-center text-grey q-pa-xl">
+      <q-icon name="security" size="64px" class="q-mb-md" />
+      <div class="text-h6">Selecione um grupo</div>
+      <div>Escolha um grupo acima para visualizar e editar suas permissões</div>
+    </div>
+
+    <!-- Botão salvar -->
+    <div v-if="selectedGroupId && !loading" class="q-mt-lg row justify-end q-gutter-sm">
+      <q-btn
+        outline
+        color="grey"
+        label="Marcar todos"
+        no-caps
+        :disable="isMasterGroup"
+        @click="selectAll"
+      />
+      <q-btn
+        outline
+        color="grey"
+        label="Desmarcar todos"
+        no-caps
+        :disable="isMasterGroup"
+        @click="deselectAll"
+      />
       <q-btn
         color="primary"
-        label="Salvar permissoes"
+        icon="save"
+        label="Salvar permissões"
         :loading="saving"
         :disable="isMasterGroup"
         no-caps
         @click="savePermissions"
       />
     </div>
-
-    <q-banner v-if="isMasterGroup" class="bg-info text-white q-mt-md" rounded>
-      <template #avatar>
-        <q-icon name="info" />
-      </template>
-      O grupo Master possui todas as permissoes e nao pode ser editado.
-    </q-banner>
   </q-page>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
-import { useQuasar, type QTableColumn } from 'quasar';
+import { useQuasar } from 'quasar';
 import rbacService from 'src/services/rbac.service';
 import type { Group, PermissionDef } from 'src/types/rbac';
 import { tModule, tAction } from 'src/utils/translations';
@@ -85,12 +114,21 @@ const currentPermissionKeys = ref<Set<string>>(new Set());
 const loading = ref(false);
 const saving = ref(false);
 
-// Extrair todas as ações únicas das permissões (dinâmico, não fixo)
-const allActions = computed(() => {
-  const acts = new Set<string>();
-  allPermissions.value.forEach((p) => acts.add(p.action));
-  return Array.from(acts).sort();
-});
+// Ícones por módulo
+const moduleIcons: Record<string, string> = {
+  accounts: 'account_balance',
+  transactions: 'receipt_long',
+  categories: 'category',
+  budgets: 'savings',
+  savings_goals: 'flag',
+  recurring: 'autorenew',
+  family: 'home',
+  members: 'people',
+  groups: 'admin_panel_settings',
+  billing: 'credit_card',
+  reports: 'assessment',
+  notifications: 'notifications',
+};
 
 const groupOptions = computed(() => groups.value.map((g) => ({ label: g.name, value: g.id })));
 
@@ -99,37 +137,33 @@ const isMasterGroup = computed(() => {
   return group?.slug === 'master';
 });
 
-// Build unique modules from all permissions
+// Módulos únicos
 const modules = computed(() => {
   const mods = new Set<string>();
   allPermissions.value.forEach((p) => mods.add(p.module));
   return Array.from(mods).sort();
 });
 
-// All available actions per module
-const moduleActions = computed(() => {
-  const map = new Map<string, Set<string>>();
+// Ações por módulo
+const moduleActionsMap = computed(() => {
+  const map = new Map<string, string[]>();
   allPermissions.value.forEach((p) => {
-    if (!map.has(p.module)) map.set(p.module, new Set());
-    map.get(p.module)!.add(p.action);
+    if (!map.has(p.module)) map.set(p.module, []);
+    const actions = map.get(p.module)!;
+    if (!actions.includes(p.action)) actions.push(p.action);
   });
   return map;
 });
 
-const matrixColumns = computed<QTableColumn[]>(() => [
-  { name: 'module', label: 'Módulo', field: 'module', align: 'left' },
-  ...allActions.value.map((a) => ({
-    name: a,
-    label: tAction(a),
-    field: a,
-    align: 'center' as const,
-  })),
-]);
+function getModuleActions(mod: string): string[] {
+  return moduleActionsMap.value.get(mod) || [];
+}
 
-const matrixRows = computed(() => modules.value.map((m) => ({ module: m })));
-
-function hasAction(module: string, action: string): boolean {
-  return moduleActions.value.get(module)?.has(action) ?? false;
+// Caption mostra "X de Y selecionadas"
+function moduleCaption(mod: string): string {
+  const actions = getModuleActions(mod);
+  const checked = actions.filter((a) => isChecked(mod, a)).length;
+  return `${checked} de ${actions.length} permissões`;
 }
 
 function isChecked(module: string, action: string): boolean {
@@ -139,17 +173,23 @@ function isChecked(module: string, action: string): boolean {
 
 function togglePermission(module: string, action: string) {
   const key = `${module}:${action}`;
-  if (currentPermissionKeys.value.has(key)) {
-    currentPermissionKeys.value.delete(key);
+  const newSet = new Set(currentPermissionKeys.value);
+  if (newSet.has(key)) {
+    newSet.delete(key);
   } else {
-    currentPermissionKeys.value.add(key);
+    newSet.add(key);
   }
+  currentPermissionKeys.value = newSet;
 }
 
-/**
- * Converte as chaves module:action selecionadas em permissionIds
- * para enviar ao backend.
- */
+function selectAll() {
+  currentPermissionKeys.value = new Set(allPermissions.value.map((p) => `${p.module}:${p.action}`));
+}
+
+function deselectAll() {
+  currentPermissionKeys.value = new Set();
+}
+
 function selectedPermissionIds(): string[] {
   const ids: string[] = [];
   for (const key of currentPermissionKeys.value) {
@@ -165,12 +205,10 @@ async function onGroupChange() {
   try {
     const group = groups.value.find((g) => g.id === selectedGroupId.value);
     if (group?.slug === 'master') {
-      // Master tem todas as permissoes
       currentPermissionKeys.value = new Set(
         allPermissions.value.map((p) => `${p.module}:${p.action}`),
       );
     } else {
-      // Buscar permissoes reais do grupo via API
       try {
         const response = await rbacService.getGroupPermissions(selectedGroupId.value);
         const perms = response.data || response;
@@ -178,12 +216,10 @@ async function onGroupChange() {
           (perms as PermissionDef[]).map((p: PermissionDef) => `${p.module}:${p.action}`),
         );
       } catch {
-        // Se o endpoint nao existir, iniciar vazio
         currentPermissionKeys.value = new Set();
         $q.notify({
           type: 'warning',
-          message:
-            'Nao foi possivel carregar permissoes do grupo. Elas serao salvas ao clicar em Salvar.',
+          message: 'Não foi possível carregar permissões do grupo. Marque as desejadas e salve.',
         });
       }
     }
@@ -197,15 +233,14 @@ async function savePermissions() {
   saving.value = true;
   try {
     const ids = selectedPermissionIds();
-    const response = await rbacService.updateGroupPermissions(selectedGroupId.value, ids);
-    // Atualizar com a resposta do backend
-    const perms = response.data || response;
-    currentPermissionKeys.value = new Set(
-      (perms as PermissionDef[]).map((p: PermissionDef) => `${p.module}:${p.action}`),
-    );
-    $q.notify({ type: 'positive', message: 'Permissoes salvas com sucesso!' });
+    await rbacService.updateGroupPermissions(selectedGroupId.value, ids);
+    $q.notify({
+      type: 'positive',
+      message: 'Permissões salvas com sucesso!',
+      icon: 'check_circle',
+    });
   } catch {
-    $q.notify({ type: 'negative', message: 'Erro ao salvar permissoes' });
+    $q.notify({ type: 'negative', message: 'Erro ao salvar permissões' });
   } finally {
     saving.value = false;
   }
