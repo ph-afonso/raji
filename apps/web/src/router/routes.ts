@@ -1,13 +1,13 @@
-import type { RouteRecordRaw } from 'vue-router'
+import type { RouteRecordRaw } from 'vue-router';
 
 // Extend RouteMeta
 declare module 'vue-router' {
   interface RouteMeta {
-    requiresAuth?: boolean
-    guestOnly?: boolean
-    permission?: string
-    title?: string
-    requiresSubscription?: boolean
+    requiresAuth?: boolean;
+    guestOnly?: boolean;
+    permission?: string;
+    title?: string;
+    requiresSubscription?: boolean;
   }
 }
 
@@ -58,44 +58,52 @@ const routes: RouteRecordRaw[] = [
         path: 'accounts',
         name: 'accounts',
         meta: { title: 'Contas', permission: 'accounts:read' },
-        component: () => import('pages/DashboardPage.vue'), // Placeholder
+        component: () => import('pages/DashboardPage.vue'), // Placeholder — Sprint 2+
       },
       {
         path: 'transactions',
         name: 'transactions',
         meta: { title: 'Transacoes', permission: 'transactions:read' },
-        component: () => import('pages/DashboardPage.vue'), // Placeholder
+        component: () => import('pages/DashboardPage.vue'), // Placeholder — Sprint 2+
       },
       {
         path: 'categories',
         name: 'categories',
         meta: { title: 'Categorias', permission: 'categories:read' },
-        component: () => import('pages/DashboardPage.vue'), // Placeholder
+        component: () => import('pages/DashboardPage.vue'), // Placeholder — Sprint 2+
       },
       {
         path: 'recurring',
         name: 'recurring',
         meta: { title: 'Recorrencias', permission: 'recurring:read' },
-        component: () => import('pages/DashboardPage.vue'), // Placeholder
+        component: () => import('pages/DashboardPage.vue'), // Placeholder — Sprint 2+
       },
       {
         path: 'budgets',
         name: 'budgets',
         meta: { title: 'Orcamentos', permission: 'budgets:read' },
-        component: () => import('pages/DashboardPage.vue'), // Placeholder
+        component: () => import('pages/DashboardPage.vue'), // Placeholder — Sprint 2+
       },
       {
         path: 'goals',
         name: 'goals',
         meta: { title: 'Metas', permission: 'savings_goals:read' },
-        component: () => import('pages/DashboardPage.vue'), // Placeholder
+        component: () => import('pages/DashboardPage.vue'), // Placeholder — Sprint 2+
       },
+      // Familia
       {
         path: 'family',
         name: 'family',
         meta: { title: 'Familia', permission: 'family:read' },
-        component: () => import('pages/DashboardPage.vue'), // Placeholder
+        component: () => import('pages/family/FamilySettingsPage.vue'),
       },
+      {
+        path: 'family/members',
+        name: 'family-members',
+        meta: { title: 'Membros', permission: 'family:read' },
+        component: () => import('pages/family/MembersPage.vue'),
+      },
+      // RBAC
       {
         path: 'rbac',
         children: [
@@ -117,13 +125,14 @@ const routes: RouteRecordRaw[] = [
         path: 'subscription',
         name: 'subscription',
         meta: { title: 'Assinatura', permission: 'billing:read' },
-        component: () => import('pages/DashboardPage.vue'), // Placeholder
+        component: () => import('pages/DashboardPage.vue'), // Placeholder — Sprint 2+
       },
+      // Perfil
       {
         path: 'profile',
         name: 'profile',
         meta: { title: 'Meu Perfil' },
-        component: () => import('pages/DashboardPage.vue'), // Placeholder
+        component: () => import('pages/profile/ProfilePage.vue'),
       },
     ],
   },
@@ -145,6 +154,6 @@ const routes: RouteRecordRaw[] = [
     path: '/:catchAll(.*)*',
     component: () => import('pages/errors/Error404Page.vue'),
   },
-]
+];
 
-export default routes
+export default routes;
