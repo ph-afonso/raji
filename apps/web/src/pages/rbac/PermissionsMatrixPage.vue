@@ -37,15 +37,71 @@
         v-for="mod in modules"
         :key="mod"
         :icon="moduleIcons[mod] || 'folder'"
-        :label="tModule(mod)"
-        :caption="moduleCaption(mod)"
         header-class="text-weight-medium"
         expand-icon-class="text-primary"
       >
+        <!-- Header customizado com label + ? + caption -->
+        <template #header>
+          <q-item-section avatar>
+            <q-icon :name="moduleIcons[mod] || 'folder'" />
+          </q-item-section>
+          <q-item-section>
+            <q-item-label class="row items-center q-gutter-xs">
+              <span class="text-weight-medium">{{ tModule(mod) }}</span>
+              <q-btn flat round dense size="xs" icon="help_outline" color="grey" @click.stop>
+                <q-tooltip
+                  class="bg-grey-9 text-body2"
+                  anchor="top middle"
+                  self="bottom middle"
+                  max-width="320px"
+                >
+                  {{ getModuleDescription(mod) }}
+                </q-tooltip>
+              </q-btn>
+            </q-item-label>
+            <q-item-label caption>{{ moduleCaption(mod) }}</q-item-label>
+          </q-item-section>
+        </template>
+
+        <!-- Toggle "Liberar módulo inteiro" -->
+        <q-item class="bg-grey-2">
+          <q-item-section>
+            <q-item-label class="text-weight-bold text-primary">
+              Liberar módulo inteiro?
+            </q-item-label>
+            <q-item-label caption>
+              Ativa ou desativa todas as permissões deste módulo de uma vez
+            </q-item-label>
+          </q-item-section>
+          <q-item-section side>
+            <q-toggle
+              :model-value="isModuleFullyChecked(mod)"
+              :disable="isMasterGroup"
+              color="primary"
+              @update:model-value="toggleModule(mod)"
+            />
+          </q-item-section>
+        </q-item>
+
+        <q-separator />
+
+        <!-- Permissões individuais -->
         <q-list separator dense class="q-pl-sm">
           <q-item v-for="action in getModuleActions(mod)" :key="action">
             <q-item-section>
-              <q-item-label>{{ actionDescription(mod, action) }}</q-item-label>
+              <q-item-label class="row items-center q-gutter-xs">
+                <span>{{ actionDescription(mod, action) }}</span>
+                <q-btn flat round dense size="xs" icon="help_outline" color="grey-5" @click.stop>
+                  <q-tooltip
+                    class="bg-grey-9 text-body2"
+                    anchor="top middle"
+                    self="bottom middle"
+                    max-width="320px"
+                  >
+                    {{ getActionDescription(mod, action) }}
+                  </q-tooltip>
+                </q-btn>
+              </q-item-label>
             </q-item-section>
             <q-item-section side>
               <q-toggle
@@ -68,23 +124,7 @@
     </div>
 
     <!-- Botão salvar -->
-    <div v-if="selectedGroupId && !loading" class="q-mt-lg row justify-end q-gutter-sm">
-      <q-btn
-        outline
-        color="grey"
-        label="Marcar todos"
-        no-caps
-        :disable="isMasterGroup"
-        @click="selectAll"
-      />
-      <q-btn
-        outline
-        color="grey"
-        label="Desmarcar todos"
-        no-caps
-        :disable="isMasterGroup"
-        @click="deselectAll"
-      />
+    <div v-if="selectedGroupId && !loading" class="q-mt-lg row justify-end">
       <q-btn
         color="primary"
         icon="save"
@@ -103,7 +143,12 @@ import { ref, computed, onMounted } from 'vue';
 import { useQuasar } from 'quasar';
 import rbacService from 'src/services/rbac.service';
 import type { Group, PermissionDef } from 'src/types/rbac';
-import { tModule, tAction, moduleLabels, actionLabels } from 'src/utils/translations';
+import {
+  tModule,
+  tAction,
+  moduleDescriptions,
+  actionDescriptionsByModule,
+} from 'src/utils/translations';
 
 const $q = useQuasar();
 
@@ -114,7 +159,6 @@ const currentPermissionKeys = ref<Set<string>>(new Set());
 const loading = ref(false);
 const saving = ref(false);
 
-// Ícones por módulo
 const moduleIcons: Record<string, string> = {
   accounts: 'account_balance',
   transactions: 'receipt_long',
@@ -137,14 +181,12 @@ const isMasterGroup = computed(() => {
   return group?.slug === 'master';
 });
 
-// Módulos únicos
 const modules = computed(() => {
   const mods = new Set<string>();
   allPermissions.value.forEach((p) => mods.add(p.module));
   return Array.from(mods).sort();
 });
 
-// Ações por módulo
 const moduleActionsMap = computed(() => {
   const map = new Map<string, string[]>();
   allPermissions.value.forEach((p) => {
@@ -159,38 +201,68 @@ function getModuleActions(mod: string): string[] {
   return moduleActionsMap.value.get(mod) || [];
 }
 
-// Gera descrições como "Permitir criar contas?"
-const actionDescriptions: Record<string, Record<string, string>> = {
-  create: { prefix: 'Permitir criar', suffix: '?' },
-  read: { prefix: 'Permitir visualizar', suffix: '?' },
-  update: { prefix: 'Permitir editar', suffix: '?' },
-  delete: { prefix: 'Permitir excluir', suffix: '?' },
-  import: { prefix: 'Permitir importar', suffix: '?' },
-  invite: { prefix: 'Permitir convidar', suffix: '?' },
-  remove: { prefix: 'Permitir remover', suffix: '?' },
-  change_group: { prefix: 'Permitir alterar grupo de', suffix: '?' },
-  manage: { prefix: 'Permitir gerenciar', suffix: '?' },
-};
-
-function actionDescription(mod: string, action: string): string {
-  const moduleName = tModule(mod).toLowerCase();
-  const desc = actionDescriptions[action];
-  if (desc) {
-    return `${desc.prefix} ${moduleName}${desc.suffix}`;
-  }
-  return `Permitir ${tAction(action).toLowerCase()} ${moduleName}?`;
+function getModuleDescription(mod: string): string {
+  return moduleDescriptions[mod] || `Módulo de ${tModule(mod).toLowerCase()} do sistema.`;
 }
 
-// Caption mostra "X de Y selecionadas"
+function getActionDescription(mod: string, action: string): string {
+  return (
+    actionDescriptionsByModule[mod]?.[action] ||
+    `Permite ${tAction(action).toLowerCase()} ${tModule(mod).toLowerCase()} no sistema.`
+  );
+}
+
+// Gera descrições como "Permitir criar contas?"
+function actionDescription(mod: string, action: string): string {
+  const moduleName = tModule(mod).toLowerCase();
+  const actionPrefixes: Record<string, string> = {
+    create: 'Permitir criar',
+    read: 'Permitir visualizar',
+    update: 'Permitir editar',
+    delete: 'Permitir excluir',
+    import: 'Permitir importar',
+    invite: 'Permitir convidar',
+    remove: 'Permitir remover',
+    change_group: 'Permitir alterar grupo de',
+    manage: 'Permitir gerenciar',
+  };
+  const prefix = actionPrefixes[action] || `Permitir ${tAction(action).toLowerCase()}`;
+  return `${prefix} ${moduleName}?`;
+}
+
 function moduleCaption(mod: string): string {
   const actions = getModuleActions(mod);
   const checked = actions.filter((a) => isChecked(mod, a)).length;
+  if (checked === actions.length) return `Todas as ${actions.length} permissões liberadas`;
+  if (checked === 0) return `Nenhuma permissão liberada`;
   return `${checked} de ${actions.length} permissões`;
 }
 
 function isChecked(module: string, action: string): boolean {
   if (isMasterGroup.value) return true;
   return currentPermissionKeys.value.has(`${module}:${action}`);
+}
+
+function isModuleFullyChecked(mod: string): boolean {
+  if (isMasterGroup.value) return true;
+  const actions = getModuleActions(mod);
+  return actions.every((a) => currentPermissionKeys.value.has(`${mod}:${a}`));
+}
+
+function toggleModule(mod: string) {
+  const actions = getModuleActions(mod);
+  const newSet = new Set(currentPermissionKeys.value);
+  const allChecked = isModuleFullyChecked(mod);
+
+  for (const action of actions) {
+    const key = `${mod}:${action}`;
+    if (allChecked) {
+      newSet.delete(key);
+    } else {
+      newSet.add(key);
+    }
+  }
+  currentPermissionKeys.value = newSet;
 }
 
 function togglePermission(module: string, action: string) {
@@ -202,14 +274,6 @@ function togglePermission(module: string, action: string) {
     newSet.add(key);
   }
   currentPermissionKeys.value = newSet;
-}
-
-function selectAll() {
-  currentPermissionKeys.value = new Set(allPermissions.value.map((p) => `${p.module}:${p.action}`));
-}
-
-function deselectAll() {
-  currentPermissionKeys.value = new Set();
 }
 
 function selectedPermissionIds(): string[] {
