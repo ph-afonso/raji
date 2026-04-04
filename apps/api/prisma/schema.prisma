@@ -12,80 +12,6 @@ datasource db {
 }
 
 // ============================================================
-// ENUMS
-// ============================================================
-
-/// Status da assinatura da familia
-enum SubscriptionStatus {
-  TRIAL       // Periodo de teste (15 dias)
-  ACTIVE      // Pagamento em dia
-  PAST_DUE    // Falha no pagamento (grace period)
-  EXPIRED     // Trial ou grace period expirado
-  CANCELED    // Cancelado voluntariamente
-}
-
-/// Tipo de conta financeira
-enum AccountType {
-  CHECKING    // Conta corrente
-  SAVINGS     // Poupanca
-  WALLET      // Carteira (dinheiro fisico)
-  CREDIT_CARD // Cartao de credito
-  INVESTMENT  // Investimento
-  OTHER       // Outro
-}
-
-/// Tipo de transacao financeira
-enum TransactionType {
-  INCOME      // Receita
-  EXPENSE     // Despesa
-  TRANSFER    // Transferencia entre contas
-}
-
-/// Frequencia de transacao recorrente
-enum RecurrenceFrequency {
-  DAILY       // Diaria
-  WEEKLY      // Semanal
-  BIWEEKLY    // Quinzenal
-  MONTHLY     // Mensal
-  BIMONTHLY   // Bimestral
-  QUARTERLY   // Trimestral
-  SEMIANNUAL  // Semestral
-  ANNUAL      // Anual
-}
-
-/// Status da transacao recorrente
-enum RecurrenceStatus {
-  ACTIVE      // Ativa, gerando lancamentos
-  PAUSED      // Pausada temporariamente
-  FINISHED    // Encerrada (parcelas finalizadas)
-  CANCELED    // Cancelada
-}
-
-/// Status do convite de membro
-enum InviteStatus {
-  PENDING     // Aguardando aceite
-  ACCEPTED    // Aceito
-  EXPIRED     // Expirado (7 dias)
-  REVOKED     // Revogado pelo master
-}
-
-/// Tipo de notificacao
-enum NotificationType {
-  BUDGET_ALERT      // Alerta de orcamento excedido/proximo
-  GOAL_MILESTONE    // Meta atingiu marco
-  RECURRING_DUE     // Conta recorrente vencendo
-  INVITE_RECEIVED   // Convite recebido
-  SUBSCRIPTION_WARN // Aviso de assinatura (expirando, falha)
-  SYSTEM            // Notificacao do sistema
-}
-
-/// Metodo de pagamento usado no billing
-enum PaymentMethod {
-  CREDIT_CARD // Cartao de credito (Stripe)
-  PIX         // Pix
-}
-
-// ============================================================
 // MODELOS DE IDENTIDADE E ACESSO
 // ============================================================
 
@@ -238,7 +164,7 @@ model GroupPermission {
 model Account {
   id             String      @id @default(uuid())
   name           String      /// Nome da conta (ex: "Nubank", "Carteira")
-  type           AccountType /// Tipo da conta
+  type           String /// Valores: CHECKING, SAVINGS, WALLET, CREDIT_CARD, INVESTMENT, OTHER
   balance        Decimal     @default(0) /// Saldo atual
   initialBalance Decimal     @default(0) @map("initial_balance") /// Saldo inicial
   currency       String      @default("BRL") /// Moeda (ISO 4217)
@@ -269,7 +195,7 @@ model Account {
 model Category {
   id        String          @id @default(uuid())
   name      String          /// Nome da categoria
-  type      TransactionType /// INCOME, EXPENSE ou TRANSFER
+  type      String /// Valores: INCOME, EXPENSE, TRANSFER
   icon      String?         /// Icone (Material/Quasar)
   color     String?         /// Cor hex
   isSystem  Boolean         @default(false) @map("is_system") /// Categoria padrao do sistema (nao deletavel)
@@ -318,7 +244,7 @@ model Subcategory {
 /// Transacao financeira (receita, despesa ou transferencia)
 model Transaction {
   id          String          @id @default(uuid())
-  type        TransactionType /// INCOME, EXPENSE ou TRANSFER
+  type        String /// Valores: INCOME, EXPENSE, TRANSFER
   amount      Decimal         /// Valor (sempre positivo)
   description String?         /// Descricao/observacao
   date        DateTime        /// Data da transacao
@@ -369,11 +295,11 @@ model Transaction {
 /// Transacao recorrente (gera lancamentos automaticamente)
 model RecurringTransaction {
   id          String              @id @default(uuid())
-  type        TransactionType     /// INCOME ou EXPENSE
+  type        String /// Valores: INCOME, EXPENSE, TRANSFER
   amount      Decimal             /// Valor de cada parcela/recorrencia
   description String?             /// Descricao
-  frequency   RecurrenceFrequency /// Frequencia
-  status      RecurrenceStatus    @default(ACTIVE)
+  frequency   String /// Valores: DAILY, WEEKLY, BIWEEKLY, MONTHLY, BIMONTHLY, QUARTERLY, SEMIANNUAL, ANNUAL
+  status      String    @default("ACTIVE") /// Valores: ACTIVE, PAUSED, FINISHED, CANCELED
 
   startDate   DateTime  @map("start_date") /// Data de inicio
   endDate     DateTime? @map("end_date")   /// Data de fim (null = sem fim)
@@ -486,7 +412,7 @@ model SavingsContribution {
 /// Assinatura da familia (1:1 com Family)
 model Subscription {
   id                 String             @id @default(uuid())
-  status             SubscriptionStatus @default(TRIAL)
+  status             String @default("TRIAL") /// Valores: TRIAL, ACTIVE, PAST_DUE, EXPIRED, CANCELED
   trialEndsAt        DateTime?          @map("trial_ends_at") /// Fim do trial
   currentPeriodStart DateTime?          @map("current_period_start")
   currentPeriodEnd   DateTime?          @map("current_period_end")
@@ -517,7 +443,7 @@ model Payment {
   id          String        @id @default(uuid())
   amount      Decimal       /// Valor pago
   currency    String        @default("BRL")
-  method      PaymentMethod /// Metodo de pagamento
+  method      String /// Valores: CREDIT_CARD, PIX
   description String?       /// Descricao (ex: "Assinatura mensal", "Membro adicional")
   isPaid      Boolean       @default(false) @map("is_paid")
   paidAt      DateTime?     @map("paid_at")
@@ -563,7 +489,7 @@ model Invite {
   id         String       @id @default(uuid())
   email      String       /// Email do convidado
   token      String       @unique /// Token unico para aceite (UUID ou nanoid)
-  status     InviteStatus @default(PENDING)
+  status     String @default("PENDING") /// Valores: PENDING, ACCEPTED, EXPIRED, REVOKED
   expiresAt  DateTime     @map("expires_at") /// Expira em 7 dias
   acceptedAt DateTime?    @map("accepted_at")
   createdAt  DateTime     @default(now())
@@ -592,7 +518,7 @@ model Invite {
 /// Notificacao in-app e push
 model Notification {
   id        String           @id @default(uuid())
-  type      NotificationType /// Tipo da notificacao
+  type      String /// Valores: BUDGET_ALERT, GOAL_MILESTONE, RECURRING_DUE, INVITE_RECEIVED, SUBSCRIPTION_WARN, SYSTEM
   title     String           /// Titulo
   message   String           /// Mensagem
   data      String?          /// Dados extras (JSON serializado como string para SQLite)
