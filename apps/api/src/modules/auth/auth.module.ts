@@ -15,7 +15,11 @@ import { JwtAuthGuard } from './guards/jwt-auth.guard';
   imports: [
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({
-      secret: process.env.JWT_SECRET || 'raji-dev-secret-change-in-prod',
+      secret: (() => {
+        const secret = process.env.JWT_SECRET;
+        if (!secret) throw new Error('JWT_SECRET environment variable is required');
+        return secret;
+      })(),
       signOptions: { expiresIn: '15m' },
     }),
   ],

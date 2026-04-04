@@ -1,13 +1,7 @@
 // modules/families/families.controller.ts
 // Controller de familias
 
-import {
-  Controller,
-  Get,
-  Patch,
-  Param,
-  Body,
-} from '@nestjs/common';
+import { Controller, Get, Patch, Body } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { FamiliesService } from './families.service';
 import { UpdateFamilyDto } from './dto/update-family.dto';
@@ -26,14 +20,14 @@ export class FamiliesController {
     return this.familiesService.findMyFamily(familyId);
   }
 
-  @Patch(':id')
-  @ApiOperation({ summary: 'Atualizar nome da familia (apenas Master)' })
+  @Patch('me')
+  @ApiOperation({ summary: 'Atualizar nome da familia do usuario logado (apenas Master)' })
   async updateFamily(
-    @Param('id') id: string,
+    @CurrentFamily() familyId: string,
     @CurrentUser() user: RequestUser,
     @Body() dto: UpdateFamilyDto,
   ) {
-    return this.familiesService.updateFamily(id, dto, user.isFamilyOwner);
+    return this.familiesService.updateFamily(familyId, dto, user.isFamilyOwner);
   }
 
   @Get('me/members')

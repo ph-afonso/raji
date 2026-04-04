@@ -13,17 +13,16 @@ export interface JwtRefreshPayload {
 }
 
 @Injectable()
-export class JwtRefreshStrategy extends PassportStrategy(
-  Strategy,
-  'jwt-refresh',
-) {
+export class JwtRefreshStrategy extends PassportStrategy(Strategy, 'jwt-refresh') {
   constructor() {
     super({
       jwtFromRequest: ExtractJwt.fromBodyField('refreshToken'),
       ignoreExpiration: false,
-      secretOrKey:
-        process.env.JWT_REFRESH_SECRET ||
-        'raji-dev-refresh-secret-change-in-prod',
+      secretOrKey: (() => {
+        const secret = process.env.JWT_REFRESH_SECRET;
+        if (!secret) throw new Error('JWT_REFRESH_SECRET environment variable is required');
+        return secret;
+      })(),
       passReqToCallback: true,
     });
   }

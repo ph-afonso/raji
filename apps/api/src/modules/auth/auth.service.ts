@@ -327,7 +327,11 @@ export class AuthService {
           type: 'access',
         },
         {
-          secret: process.env.JWT_SECRET || 'raji-dev-secret-change-in-prod',
+          secret: (() => {
+            const s = process.env.JWT_SECRET;
+            if (!s) throw new Error('JWT_SECRET environment variable is required');
+            return s;
+          })(),
           expiresIn: ACCESS_TOKEN_EXPIRY,
         },
       ),
@@ -339,7 +343,11 @@ export class AuthService {
           type: 'refresh',
         },
         {
-          secret: process.env.JWT_REFRESH_SECRET || 'raji-dev-refresh-secret-change-in-prod',
+          secret: (() => {
+            const s = process.env.JWT_REFRESH_SECRET;
+            if (!s) throw new Error('JWT_REFRESH_SECRET environment variable is required');
+            return s;
+          })(),
           expiresIn: '7d',
         },
       ),
