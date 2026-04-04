@@ -70,47 +70,45 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
-import { useQuasar, type QTableColumn } from 'quasar'
-import rbacService from 'src/services/rbac.service'
-import type { Group, PermissionDef } from 'src/types/rbac'
+import { ref, computed, onMounted } from 'vue';
+import { useQuasar, type QTableColumn } from 'quasar';
+import rbacService from 'src/services/rbac.service';
+import type { Group, PermissionDef } from 'src/types/rbac';
 
-const $q = useQuasar()
+const $q = useQuasar();
 
-const groups = ref<Group[]>([])
-const allPermissions = ref<PermissionDef[]>([])
-const selectedGroupId = ref<string | null>(null)
-const currentPermissions = ref<Set<string>>(new Set())
-const loading = ref(false)
-const saving = ref(false)
+const groups = ref<Group[]>([]);
+const allPermissions = ref<PermissionDef[]>([]);
+const selectedGroupId = ref<string | null>(null);
+const currentPermissionKeys = ref<Set<string>>(new Set());
+const loading = ref(false);
+const saving = ref(false);
 
-const actions = ['create', 'read', 'update', 'delete']
+const actions = ['create', 'read', 'update', 'delete'];
 
-const groupOptions = computed(() =>
-  groups.value.map((g) => ({ label: g.name, value: g.id })),
-)
+const groupOptions = computed(() => groups.value.map((g) => ({ label: g.name, value: g.id })));
 
 const isMasterGroup = computed(() => {
-  const group = groups.value.find((g) => g.id === selectedGroupId.value)
-  return group?.slug === 'master'
-})
+  const group = groups.value.find((g) => g.id === selectedGroupId.value);
+  return group?.slug === 'master';
+});
 
 // Build unique modules from all permissions
 const modules = computed(() => {
-  const mods = new Set<string>()
-  allPermissions.value.forEach((p) => mods.add(p.module))
-  return Array.from(mods).sort()
-})
+  const mods = new Set<string>();
+  allPermissions.value.forEach((p) => mods.add(p.module));
+  return Array.from(mods).sort();
+});
 
 // All available actions per module
 const moduleActions = computed(() => {
-  const map = new Map<string, Set<string>>()
+  const map = new Map<string, Set<string>>();
   allPermissions.value.forEach((p) => {
-    if (!map.has(p.module)) map.set(p.module, new Set())
-    map.get(p.module)!.add(p.action)
-  })
-  return map
-})
+    if (!map.has(p.module)) map.set(p.module, new Set());
+    map.get(p.module)!.add(p.action);
+  });
+  return map;
+});
 
 const matrixColumns = computed<QTableColumn[]>(() => [
   { name: 'module', label: 'Modulo', field: 'module', align: 'left' },
@@ -120,80 +118,106 @@ const matrixColumns = computed<QTableColumn[]>(() => [
     field: a,
     align: 'center' as const,
   })),
-])
+]);
 
-const matrixRows = computed(() =>
-  modules.value.map((m) => ({ module: m })),
-)
+const matrixRows = computed(() => modules.value.map((m) => ({ module: m })));
 
 function hasAction(module: string, action: string): boolean {
-  return moduleActions.value.get(module)?.has(action) ?? false
+  return moduleActions.value.get(module)?.has(action) ?? false;
 }
 
 function isChecked(module: string, action: string): boolean {
-  if (isMasterGroup.value) return true
-  return currentPermissions.value.has(`${module}:${action}`)
+  if (isMasterGroup.value) return true;
+  return currentPermissionKeys.value.has(`${module}:${action}`);
 }
 
 function togglePermission(module: string, action: string) {
-  const key = `${module}:${action}`
-  if (currentPermissions.value.has(key)) {
-    currentPermissions.value.delete(key)
+  const key = `${module}:${action}`;
+  if (currentPermissionKeys.value.has(key)) {
+    currentPermissionKeys.value.delete(key);
   } else {
-    currentPermissions.value.add(key)
+    currentPermissionKeys.value.add(key);
   }
 }
 
+/**
+ * Converte as chaves module:action selecionadas em permissionIds
+ * para enviar ao backend.
+ */
+function selectedPermissionIds(): string[] {
+  const ids: string[] = [];
+  for (const key of currentPermissionKeys.value) {
+    const perm = allPermissions.value.find((p) => `${p.module}:${p.action}` === key);
+    if (perm) ids.push(perm.id);
+  }
+  return ids;
+}
+
 async function onGroupChange() {
-  if (!selectedGroupId.value) return
-  loading.value = true
+  if (!selectedGroupId.value) return;
+  loading.value = true;
   try {
-    // Load current group permissions — for now we parse from allPermissions
-    // The actual group permissions will come from a future endpoint
-    // Placeholder: load all permissions for master, empty for others
-    const group = groups.value.find((g) => g.id === selectedGroupId.value)
+    const group = groups.value.find((g) => g.id === selectedGroupId.value);
     if (group?.slug === 'master') {
-      currentPermissions.value = new Set(
+      // Master tem todas as permissoes
+      currentPermissionKeys.value = new Set(
         allPermissions.value.map((p) => `${p.module}:${p.action}`),
-      )
+      );
     } else {
-      // In a real app, fetch group-specific permissions from API
-      currentPermissions.value = new Set()
+      // Buscar permissoes reais do grupo via API
+      try {
+        const response = await rbacService.getGroupPermissions(selectedGroupId.value);
+        const perms = response.data || response;
+        currentPermissionKeys.value = new Set(
+          (perms as PermissionDef[]).map((p: PermissionDef) => `${p.module}:${p.action}`),
+        );
+      } catch {
+        // Se o endpoint nao existir, iniciar vazio
+        currentPermissionKeys.value = new Set();
+        $q.notify({
+          type: 'warning',
+          message:
+            'Nao foi possivel carregar permissoes do grupo. Elas serao salvas ao clicar em Salvar.',
+        });
+      }
     }
   } finally {
-    loading.value = false
+    loading.value = false;
   }
 }
 
 async function savePermissions() {
-  if (!selectedGroupId.value) return
-  saving.value = true
+  if (!selectedGroupId.value) return;
+  saving.value = true;
   try {
-    await rbacService.updateGroupPermissions(
-      selectedGroupId.value,
-      Array.from(currentPermissions.value),
-    )
-    $q.notify({ type: 'positive', message: 'Permissoes salvas com sucesso!' })
+    const ids = selectedPermissionIds();
+    const response = await rbacService.updateGroupPermissions(selectedGroupId.value, ids);
+    // Atualizar com a resposta do backend
+    const perms = response.data || response;
+    currentPermissionKeys.value = new Set(
+      (perms as PermissionDef[]).map((p: PermissionDef) => `${p.module}:${p.action}`),
+    );
+    $q.notify({ type: 'positive', message: 'Permissoes salvas com sucesso!' });
   } catch {
-    $q.notify({ type: 'negative', message: 'Erro ao salvar permissoes' })
+    $q.notify({ type: 'negative', message: 'Erro ao salvar permissoes' });
   } finally {
-    saving.value = false
+    saving.value = false;
   }
 }
 
 onMounted(async () => {
-  loading.value = true
+  loading.value = true;
   try {
     const [groupsRes, permsRes] = await Promise.all([
       rbacService.listGroups(),
       rbacService.listPermissions(),
-    ])
-    groups.value = groupsRes.data
-    allPermissions.value = permsRes.data
+    ]);
+    groups.value = groupsRes.data;
+    allPermissions.value = permsRes.data;
   } catch {
-    $q.notify({ type: 'negative', message: 'Erro ao carregar dados' })
+    $q.notify({ type: 'negative', message: 'Erro ao carregar dados' });
   } finally {
-    loading.value = false
+    loading.value = false;
   }
-})
+});
 </script>
