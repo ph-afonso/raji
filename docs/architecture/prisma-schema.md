@@ -669,6 +669,7 @@ model PushSubscription {
 ### Multi-Tenancy
 
 Todas as tabelas de dados de negocio possuem `familyId` como coluna discriminadora de tenant:
+
 - `Account`, `Transaction`, `Category`, `RecurringTransaction`, `Budget`, `SavingsGoal` — isoladas por familia
 - `User`, `Group`, `Invite`, `MemberSlot` — vinculadas a familia
 - `Permission` — tabela **global** (seed do sistema, nao pertence a nenhuma familia)
@@ -677,6 +678,7 @@ Todas as tabelas de dados de negocio possuem `familyId` como coluna discriminado
 ### Indices para Performance
 
 Os indices foram projetados para as queries mais frequentes:
+
 - `(familyId)` — base de todas as queries (tenant isolation)
 - `(familyId, date)` — listagem de transacoes por periodo
 - `(familyId, accountId)` — transacoes por conta
