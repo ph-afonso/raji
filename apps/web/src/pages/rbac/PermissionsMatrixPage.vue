@@ -33,7 +33,7 @@
         <q-td :props="props">
           <!-- Module name column -->
           <template v-if="props.col.name === 'module'">
-            <span class="text-weight-bold text-capitalize">{{ props.value }}</span>
+            <span class="text-weight-bold">{{ tModule(props.value) }}</span>
           </template>
           <!-- Action checkbox columns -->
           <template v-else>
@@ -74,6 +74,7 @@ import { ref, computed, onMounted } from 'vue';
 import { useQuasar, type QTableColumn } from 'quasar';
 import rbacService from 'src/services/rbac.service';
 import type { Group, PermissionDef } from 'src/types/rbac';
+import { tModule, tAction } from 'src/utils/translations';
 
 const $q = useQuasar();
 
@@ -84,7 +85,12 @@ const currentPermissionKeys = ref<Set<string>>(new Set());
 const loading = ref(false);
 const saving = ref(false);
 
-const actions = ['create', 'read', 'update', 'delete'];
+// Extrair todas as ações únicas das permissões (dinâmico, não fixo)
+const allActions = computed(() => {
+  const acts = new Set<string>();
+  allPermissions.value.forEach((p) => acts.add(p.action));
+  return Array.from(acts).sort();
+});
 
 const groupOptions = computed(() => groups.value.map((g) => ({ label: g.name, value: g.id })));
 
@@ -111,10 +117,10 @@ const moduleActions = computed(() => {
 });
 
 const matrixColumns = computed<QTableColumn[]>(() => [
-  { name: 'module', label: 'Modulo', field: 'module', align: 'left' },
-  ...actions.map((a) => ({
+  { name: 'module', label: 'Módulo', field: 'module', align: 'left' },
+  ...allActions.value.map((a) => ({
     name: a,
-    label: a.charAt(0).toUpperCase() + a.slice(1),
+    label: tAction(a),
     field: a,
     align: 'center' as const,
   })),
