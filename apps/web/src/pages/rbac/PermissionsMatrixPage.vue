@@ -42,21 +42,21 @@
         header-class="text-weight-medium"
         expand-icon-class="text-primary"
       >
-        <q-card>
-          <q-card-section class="q-pt-none">
-            <div class="row q-gutter-md q-pt-sm">
-              <div v-for="action in getModuleActions(mod)" :key="action" class="col-auto">
-                <q-checkbox
-                  :model-value="isChecked(mod, action)"
-                  :label="tAction(action)"
-                  :disable="isMasterGroup"
-                  color="primary"
-                  @update:model-value="togglePermission(mod, action)"
-                />
-              </div>
-            </div>
-          </q-card-section>
-        </q-card>
+        <q-list separator dense class="q-pl-sm">
+          <q-item v-for="action in getModuleActions(mod)" :key="action">
+            <q-item-section>
+              <q-item-label>{{ actionDescription(mod, action) }}</q-item-label>
+            </q-item-section>
+            <q-item-section side>
+              <q-toggle
+                :model-value="isChecked(mod, action)"
+                :disable="isMasterGroup"
+                color="primary"
+                @update:model-value="togglePermission(mod, action)"
+              />
+            </q-item-section>
+          </q-item>
+        </q-list>
       </q-expansion-item>
     </q-list>
 
@@ -103,7 +103,7 @@ import { ref, computed, onMounted } from 'vue';
 import { useQuasar } from 'quasar';
 import rbacService from 'src/services/rbac.service';
 import type { Group, PermissionDef } from 'src/types/rbac';
-import { tModule, tAction } from 'src/utils/translations';
+import { tModule, tAction, moduleLabels, actionLabels } from 'src/utils/translations';
 
 const $q = useQuasar();
 
@@ -157,6 +157,28 @@ const moduleActionsMap = computed(() => {
 
 function getModuleActions(mod: string): string[] {
   return moduleActionsMap.value.get(mod) || [];
+}
+
+// Gera descrições como "Permitir criar contas?"
+const actionDescriptions: Record<string, Record<string, string>> = {
+  create: { prefix: 'Permitir criar', suffix: '?' },
+  read: { prefix: 'Permitir visualizar', suffix: '?' },
+  update: { prefix: 'Permitir editar', suffix: '?' },
+  delete: { prefix: 'Permitir excluir', suffix: '?' },
+  import: { prefix: 'Permitir importar', suffix: '?' },
+  invite: { prefix: 'Permitir convidar', suffix: '?' },
+  remove: { prefix: 'Permitir remover', suffix: '?' },
+  change_group: { prefix: 'Permitir alterar grupo de', suffix: '?' },
+  manage: { prefix: 'Permitir gerenciar', suffix: '?' },
+};
+
+function actionDescription(mod: string, action: string): string {
+  const moduleName = tModule(mod).toLowerCase();
+  const desc = actionDescriptions[action];
+  if (desc) {
+    return `${desc.prefix} ${moduleName}${desc.suffix}`;
+  }
+  return `Permitir ${tAction(action).toLowerCase()} ${moduleName}?`;
 }
 
 // Caption mostra "X de Y selecionadas"
