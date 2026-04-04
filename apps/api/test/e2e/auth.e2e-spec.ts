@@ -1,6 +1,11 @@
 // test/e2e/auth.e2e-spec.ts
 // Testes de integracao — Auth + Tenant isolation
 
+// Env vars necessarias para os testes
+process.env.JWT_SECRET = 'test-jwt-secret';
+process.env.JWT_REFRESH_SECRET = 'test-jwt-refresh-secret';
+process.env.DATABASE_URL = 'file:./test.db';
+
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import * as request from 'supertest';
@@ -120,9 +125,7 @@ describe('Auth (e2e)', () => {
     });
 
     it('GET /users/me — deve rejeitar sem token', async () => {
-      await request(app.getHttpServer())
-        .get('/api/v1/users/me')
-        .expect(401);
+      await request(app.getHttpServer()).get('/api/v1/users/me').expect(401);
     });
 
     it('POST /auth/refresh — deve renovar tokens', async () => {
@@ -170,27 +173,23 @@ describe('Auth (e2e)', () => {
 
     beforeAll(async () => {
       // Criar familia 1
-      const res1 = await request(app.getHttpServer())
-        .post('/api/v1/auth/register')
-        .send({
-          name: 'User Familia 1',
-          email: 'tenant1@email.com',
-          password: 'Senh@F0rte123',
-          familyName: 'Familia 1',
-        });
+      const res1 = await request(app.getHttpServer()).post('/api/v1/auth/register').send({
+        name: 'User Familia 1',
+        email: 'tenant1@email.com',
+        password: 'Senh@F0rte123',
+        familyName: 'Familia 1',
+      });
 
       family1Token = res1.body.data.accessToken;
       family1Id = res1.body.data.user.familyId;
 
       // Criar familia 2
-      const res2 = await request(app.getHttpServer())
-        .post('/api/v1/auth/register')
-        .send({
-          name: 'User Familia 2',
-          email: 'tenant2@email.com',
-          password: 'Senh@F0rte123',
-          familyName: 'Familia 2',
-        });
+      const res2 = await request(app.getHttpServer()).post('/api/v1/auth/register').send({
+        name: 'User Familia 2',
+        email: 'tenant2@email.com',
+        password: 'Senh@F0rte123',
+        familyName: 'Familia 2',
+      });
 
       family2Token = res2.body.data.accessToken;
       family2Id = res2.body.data.user.familyId;

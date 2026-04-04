@@ -1,6 +1,10 @@
 // test/unit/auth.service.spec.ts
 // Testes unitarios do AuthService
 
+// Env vars necessarias para os testes (JWT secrets removidos do codigo por seguranca)
+process.env.JWT_SECRET = 'test-jwt-secret';
+process.env.JWT_REFRESH_SECRET = 'test-jwt-refresh-secret';
+
 import { Test, TestingModule } from '@nestjs/testing';
 import { JwtService } from '@nestjs/jwt';
 import { ConflictException, UnauthorizedException } from '@nestjs/common';
@@ -85,9 +89,11 @@ describe('AuthService', () => {
         dependentId: 'group-dependent',
       }),
       seedDefaultCategories: jest.fn().mockResolvedValue(undefined),
-      getGroupPermissions: jest.fn().mockResolvedValue([
-        { id: 'p1', module: 'transactions', action: 'create', description: 'Criar' },
-      ]),
+      getGroupPermissions: jest
+        .fn()
+        .mockResolvedValue([
+          { id: 'p1', module: 'transactions', action: 'create', description: 'Criar' },
+        ]),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -138,9 +144,7 @@ describe('AuthService', () => {
     it('deve rejeitar email duplicado', async () => {
       (prismaService.user.findUnique as jest.Mock).mockResolvedValue(mockUser);
 
-      await expect(authService.register(registerDto)).rejects.toThrow(
-        ConflictException,
-      );
+      await expect(authService.register(registerDto)).rejects.toThrow(ConflictException);
     });
   });
 
@@ -171,18 +175,14 @@ describe('AuthService', () => {
     it('deve rejeitar credenciais invalidas (email nao encontrado)', async () => {
       (prismaService.user.findUnique as jest.Mock).mockResolvedValue(null);
 
-      await expect(authService.login(loginDto)).rejects.toThrow(
-        UnauthorizedException,
-      );
+      await expect(authService.login(loginDto)).rejects.toThrow(UnauthorizedException);
     });
 
     it('deve rejeitar credenciais invalidas (senha incorreta)', async () => {
       (prismaService.user.findUnique as jest.Mock).mockResolvedValue(mockUser);
       (bcrypt.compare as jest.Mock).mockResolvedValue(false);
 
-      await expect(authService.login(loginDto)).rejects.toThrow(
-        UnauthorizedException,
-      );
+      await expect(authService.login(loginDto)).rejects.toThrow(UnauthorizedException);
     });
 
     it('deve rejeitar usuario inativo', async () => {
@@ -190,9 +190,7 @@ describe('AuthService', () => {
       (prismaService.user.findUnique as jest.Mock).mockResolvedValue(inactiveUser);
       (bcrypt.compare as jest.Mock).mockResolvedValue(true);
 
-      await expect(authService.login(loginDto)).rejects.toThrow(
-        UnauthorizedException,
-      );
+      await expect(authService.login(loginDto)).rejects.toThrow(UnauthorizedException);
     });
   });
 
@@ -238,9 +236,9 @@ describe('AuthService', () => {
       };
       (prismaService.refreshToken.findUnique as jest.Mock).mockResolvedValue(expiredToken);
 
-      await expect(
-        authService.refreshToken('user-1', 'token-1', 'raw-token'),
-      ).rejects.toThrow(UnauthorizedException);
+      await expect(authService.refreshToken('user-1', 'token-1', 'raw-token')).rejects.toThrow(
+        UnauthorizedException,
+      );
     });
 
     it('deve rejeitar refresh token revogado e invalidar todos', async () => {
@@ -251,9 +249,9 @@ describe('AuthService', () => {
       (prismaService.refreshToken.findUnique as jest.Mock).mockResolvedValue(revokedToken);
       (prismaService.refreshToken.updateMany as jest.Mock).mockResolvedValue({ count: 1 });
 
-      await expect(
-        authService.refreshToken('user-1', 'token-1', 'raw-token'),
-      ).rejects.toThrow(UnauthorizedException);
+      await expect(authService.refreshToken('user-1', 'token-1', 'raw-token')).rejects.toThrow(
+        UnauthorizedException,
+      );
 
       // Deve ter revogado todos os tokens do usuario
       expect(prismaService.refreshToken.updateMany).toHaveBeenCalledWith({
