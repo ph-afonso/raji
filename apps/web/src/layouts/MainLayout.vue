@@ -1,43 +1,33 @@
 <template>
-  <q-layout view="lHh Lpr lFf">
-    <q-header elevated>
-      <q-toolbar>
-        <q-btn flat dense round icon="menu" aria-label="Menu" @click="toggleLeftDrawer" />
-        <q-toolbar-title> Raji Finance </q-toolbar-title>
-        <q-btn flat round icon="dark_mode" @click="toggleDarkMode" />
-      </q-toolbar>
-    </q-header>
+  <q-layout view="lHh LpR lFf">
+    <TheHeader @toggle-drawer="toggleDrawer" />
 
-    <q-drawer v-model="leftDrawerOpen" show-if-above bordered>
-      <q-list>
-        <q-item-label header>Navegação</q-item-label>
-        <q-item clickable to="/">
-          <q-item-section avatar>
-            <q-icon name="dashboard" />
-          </q-item-section>
-          <q-item-section>Dashboard</q-item-section>
-        </q-item>
-      </q-list>
+    <q-drawer
+      v-model="drawerOpen"
+      show-if-above
+      bordered
+      :width="260"
+      :breakpoint="1024"
+    >
+      <TheSidebar />
     </q-drawer>
 
     <q-page-container>
+      <TheBreadcrumb />
       <router-view />
     </q-page-container>
   </q-layout>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
-import { useQuasar } from 'quasar';
+import { ref } from 'vue'
+import TheHeader from './components/TheHeader.vue'
+import TheSidebar from './components/TheSidebar.vue'
+import TheBreadcrumb from './components/TheBreadcrumb.vue'
 
-const $q = useQuasar();
-const leftDrawerOpen = ref(false);
+const drawerOpen = ref(false)
 
-function toggleLeftDrawer() {
-  leftDrawerOpen.value = !leftDrawerOpen.value;
-}
-
-function toggleDarkMode() {
-  $q.dark.toggle();
+function toggleDrawer() {
+  drawerOpen.value = !drawerOpen.value
 }
 </script>
