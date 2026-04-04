@@ -282,23 +282,23 @@ apps/api/src/modules/
 
 ### Tabela de Responsabilidades
 
-| Modulo | Responsabilidade | Depende de |
-|--------|-----------------|------------|
-| `auth` | Login, registro, JWT, refresh token | `users`, `families`, `rbac` |
-| `users` | CRUD de usuarios | `tenant` |
-| `families` | CRUD de familias, configuracoes | `tenant` |
-| `rbac` | Grupos, permissoes, guards | `tenant` |
-| `tenant` | Isolamento multi-tenant | - |
-| `accounts` | Contas bancarias/carteiras | `tenant`, `rbac` |
-| `transactions` | Lancamentos, importacao CSV/OFX | `tenant`, `rbac`, `accounts`, `categories` |
-| `categories` | Categorias e subcategorias | `tenant`, `rbac` |
-| `recurring` | Recorrencias e agendamento | `tenant`, `rbac`, `transactions` |
-| `budgets` | Orcamentos e alertas | `tenant`, `rbac`, `categories`, `transactions` |
-| `savings-goals` | Metas de economia | `tenant`, `rbac` |
-| `billing` | Stripe, Pix, subscription, paywall | `families`, `users` |
-| `invites` | Convites de membros | `billing`, `families`, `rbac` |
-| `notifications` | Push, in-app | `users`, `tenant` |
-| `dashboard` | Agregacoes e graficos | `transactions`, `budgets`, `accounts`, `tenant` |
+| Modulo          | Responsabilidade                    | Depende de                                      |
+| --------------- | ----------------------------------- | ----------------------------------------------- |
+| `auth`          | Login, registro, JWT, refresh token | `users`, `families`, `rbac`                     |
+| `users`         | CRUD de usuarios                    | `tenant`                                        |
+| `families`      | CRUD de familias, configuracoes     | `tenant`                                        |
+| `rbac`          | Grupos, permissoes, guards          | `tenant`                                        |
+| `tenant`        | Isolamento multi-tenant             | -                                               |
+| `accounts`      | Contas bancarias/carteiras          | `tenant`, `rbac`                                |
+| `transactions`  | Lancamentos, importacao CSV/OFX     | `tenant`, `rbac`, `accounts`, `categories`      |
+| `categories`    | Categorias e subcategorias          | `tenant`, `rbac`                                |
+| `recurring`     | Recorrencias e agendamento          | `tenant`, `rbac`, `transactions`                |
+| `budgets`       | Orcamentos e alertas                | `tenant`, `rbac`, `categories`, `transactions`  |
+| `savings-goals` | Metas de economia                   | `tenant`, `rbac`                                |
+| `billing`       | Stripe, Pix, subscription, paywall  | `families`, `users`                             |
+| `invites`       | Convites de membros                 | `billing`, `families`, `rbac`                   |
+| `notifications` | Push, in-app                        | `users`, `tenant`                               |
+| `dashboard`     | Agregacoes e graficos               | `transactions`, `budgets`, `accounts`, `tenant` |
 
 ---
 
@@ -471,29 +471,29 @@ apps/web/src/
 
 Todas as rotas seguem o padrao RESTful:
 
-| Recurso | Metodo | Endpoint | Descricao |
-|---------|--------|----------|-----------|
-| Auth | POST | `/api/auth/register` | Registro |
-| Auth | POST | `/api/auth/login` | Login |
-| Auth | POST | `/api/auth/refresh` | Refresh token |
-| Auth | POST | `/api/auth/logout` | Logout |
-| Accounts | GET | `/api/accounts` | Listar contas |
-| Accounts | POST | `/api/accounts` | Criar conta |
-| Accounts | GET | `/api/accounts/:id` | Detalhe |
-| Accounts | PATCH | `/api/accounts/:id` | Atualizar |
-| Accounts | DELETE | `/api/accounts/:id` | Remover |
-| Transactions | GET | `/api/transactions` | Listar (com filtros) |
-| Transactions | POST | `/api/transactions` | Criar |
-| Transactions | POST | `/api/transactions/import` | Importar CSV/OFX |
-| Categories | GET | `/api/categories` | Listar (com subcategorias) |
-| Budgets | GET | `/api/budgets` | Listar orcamentos |
-| Budgets | GET | `/api/budgets/:id/progress` | Progresso do orcamento |
-| Dashboard | GET | `/api/dashboard/summary` | Resumo financeiro |
-| Dashboard | GET | `/api/dashboard/cashflow` | Fluxo de caixa |
-| Billing | POST | `/api/billing/checkout` | Iniciar checkout |
-| Billing | GET | `/api/billing/subscription` | Status da subscription |
-| Invites | POST | `/api/invites` | Criar convite |
-| Invites | POST | `/api/invites/:token/accept` | Aceitar convite |
+| Recurso      | Metodo | Endpoint                     | Descricao                  |
+| ------------ | ------ | ---------------------------- | -------------------------- |
+| Auth         | POST   | `/api/auth/register`         | Registro                   |
+| Auth         | POST   | `/api/auth/login`            | Login                      |
+| Auth         | POST   | `/api/auth/refresh`          | Refresh token              |
+| Auth         | POST   | `/api/auth/logout`           | Logout                     |
+| Accounts     | GET    | `/api/accounts`              | Listar contas              |
+| Accounts     | POST   | `/api/accounts`              | Criar conta                |
+| Accounts     | GET    | `/api/accounts/:id`          | Detalhe                    |
+| Accounts     | PATCH  | `/api/accounts/:id`          | Atualizar                  |
+| Accounts     | DELETE | `/api/accounts/:id`          | Remover                    |
+| Transactions | GET    | `/api/transactions`          | Listar (com filtros)       |
+| Transactions | POST   | `/api/transactions`          | Criar                      |
+| Transactions | POST   | `/api/transactions/import`   | Importar CSV/OFX           |
+| Categories   | GET    | `/api/categories`            | Listar (com subcategorias) |
+| Budgets      | GET    | `/api/budgets`               | Listar orcamentos          |
+| Budgets      | GET    | `/api/budgets/:id/progress`  | Progresso do orcamento     |
+| Dashboard    | GET    | `/api/dashboard/summary`     | Resumo financeiro          |
+| Dashboard    | GET    | `/api/dashboard/cashflow`    | Fluxo de caixa             |
+| Billing      | POST   | `/api/billing/checkout`      | Iniciar checkout           |
+| Billing      | GET    | `/api/billing/subscription`  | Status da subscription     |
+| Invites      | POST   | `/api/invites`               | Criar convite              |
+| Invites      | POST   | `/api/invites/:token/accept` | Aceitar convite            |
 
 ### Contrato de Response Padronizado
 
@@ -548,7 +548,7 @@ api.interceptors.response.use(
       // Ou mostrar toast de "sem permissao"
     }
     return Promise.reject(error);
-  }
+  },
 );
 ```
 
@@ -596,13 +596,13 @@ sequenceDiagram
 
 ```typescript
 interface JwtPayload {
-  sub: string;        // user.id (UUID)
+  sub: string; // user.id (UUID)
   email: string;
-  familyId: string;   // family.id (UUID) — pilar do multi-tenancy
-  groupId: string;    // group.id — para RBAC rapido
+  familyId: string; // family.id (UUID) — pilar do multi-tenancy
+  groupId: string; // group.id — para RBAC rapido
   type: 'access';
   iat: number;
-  exp: number;        // 15 minutos
+  exp: number; // 15 minutos
 }
 ```
 
@@ -610,26 +610,26 @@ interface JwtPayload {
 
 ```typescript
 interface RefreshTokenPayload {
-  sub: string;        // user.id
+  sub: string; // user.id
   familyId: string;
-  tokenId: string;    // ID unico do refresh token (para revogacao)
+  tokenId: string; // ID unico do refresh token (para revogacao)
   type: 'refresh';
   iat: number;
-  exp: number;        // 7 dias
+  exp: number; // 7 dias
 }
 ```
 
 ### Configuracoes de Seguranca
 
-| Parametro | Valor | Justificativa |
-|-----------|-------|---------------|
-| Access Token TTL | 15 minutos | Curto para limitar janela de ataque |
-| Refresh Token TTL | 7 dias | Equilibrio entre UX e seguranca |
-| Rotacao de Refresh Token | Sim | Novo refresh token a cada uso |
-| Hash do Refresh Token | bcrypt | Token salvo como hash no DB |
-| Revogacao | Por token e por familia | Logout e "deslogar todos" |
-| Algoritmo JWT | HS256 (dev) / RS256 (prod) | Assimetrico em producao |
-| Password Hash | bcrypt (salt rounds: 12) | Padrao da industria |
+| Parametro                | Valor                      | Justificativa                       |
+| ------------------------ | -------------------------- | ----------------------------------- |
+| Access Token TTL         | 15 minutos                 | Curto para limitar janela de ataque |
+| Refresh Token TTL        | 7 dias                     | Equilibrio entre UX e seguranca     |
+| Rotacao de Refresh Token | Sim                        | Novo refresh token a cada uso       |
+| Hash do Refresh Token    | bcrypt                     | Token salvo como hash no DB         |
+| Revogacao                | Por token e por familia    | Logout e "deslogar todos"           |
+| Algoritmo JWT            | HS256 (dev) / RS256 (prod) | Assimetrico em producao             |
+| Password Hash            | bcrypt (salt rounds: 12)   | Padrao da industria                 |
 
 ---
 
@@ -757,11 +757,11 @@ graph TB
 
 ### Grupos Padrao
 
-| Grupo | Slug | Permissoes |
-|-------|------|-----------|
-| Master/Titular | `master` | Tudo. Nao editavel. Unico por familia. |
-| Membro Full | `member-full` | CRUD completo em financas. Sem billing/RBAC. |
-| Dependente | `dependent` | Somente leitura em tudo. |
+| Grupo          | Slug          | Permissoes                                   |
+| -------------- | ------------- | -------------------------------------------- |
+| Master/Titular | `master`      | Tudo. Nao editavel. Unico por familia.       |
+| Membro Full    | `member-full` | CRUD completo em financas. Sem billing/RBAC. |
+| Dependente     | `dependent`   | Somente leitura em tudo.                     |
 
 Grupos customizaveis podem ser criados pelo Master com qualquer combinacao de permissoes.
 
@@ -858,11 +858,7 @@ export class PermissionGuard implements CanActivate {
     const request = context.switchToHttp().getRequest();
     const user = request.user;
 
-    return this.rbacService.userHasPermission(
-      user.groupId,
-      permission.module,
-      permission.action,
-    );
+    return this.rbacService.userHasPermission(user.groupId, permission.module, permission.action);
   }
 }
 ```
@@ -889,11 +885,11 @@ stateDiagram-v2
 
 ### Modelo de Precificacao
 
-| Item | Valor | Tipo |
-|------|-------|------|
-| Plano mensal (titular) | R$ X/mes | Recorrente (Stripe) |
-| Membro adicional | R$ Y (one-time) | Cobranca unica por membro |
-| Trial | 15 dias | Gratuito, funcionalidade completa |
+| Item                   | Valor           | Tipo                              |
+| ---------------------- | --------------- | --------------------------------- |
+| Plano mensal (titular) | R$ X/mes        | Recorrente (Stripe)               |
+| Membro adicional       | R$ Y (one-time) | Cobranca unica por membro         |
+| Trial                  | 15 dias         | Gratuito, funcionalidade completa |
 
 ### Fluxo de Checkout para Membro Adicional
 
@@ -963,17 +959,17 @@ No **frontend**, o `subscription.guard.ts` no router redireciona para `/paywall`
 
 ### Configuracao por Ambiente
 
-| Aspecto | Development | Staging | Production |
-|---------|------------|---------|------------|
-| Banco de dados | SQLite local | PostgreSQL (container) | PostgreSQL (managed) |
-| JWT Secret | Valor fixo em .env | Variavel de ambiente | Secrets manager (ex: AWS SSM) |
-| JWT Algoritmo | HS256 | RS256 | RS256 |
-| Stripe | Test mode + webhooks CLI | Test mode + webhook endpoint | Live mode |
-| Email | Ethereal/Mailtrap | Mailtrap | SES/SendGrid |
-| Push Notifications | Console log | Web Push (test) | Web Push (prod) |
-| CORS | `localhost:*` | Dominio staging | Dominio producao |
-| Rate Limiting | Desabilitado | Habilitado (permissivo) | Habilitado (restritivo) |
-| Logs | Console (verbose) | JSON (info) | JSON (warn/error) + APM |
+| Aspecto            | Development              | Staging                      | Production                    |
+| ------------------ | ------------------------ | ---------------------------- | ----------------------------- |
+| Banco de dados     | SQLite local             | PostgreSQL (container)       | PostgreSQL (managed)          |
+| JWT Secret         | Valor fixo em .env       | Variavel de ambiente         | Secrets manager (ex: AWS SSM) |
+| JWT Algoritmo      | HS256                    | RS256                        | RS256                         |
+| Stripe             | Test mode + webhooks CLI | Test mode + webhook endpoint | Live mode                     |
+| Email              | Ethereal/Mailtrap        | Mailtrap                     | SES/SendGrid                  |
+| Push Notifications | Console log              | Web Push (test)              | Web Push (prod)               |
+| CORS               | `localhost:*`            | Dominio staging              | Dominio producao              |
+| Rate Limiting      | Desabilitado             | Habilitado (permissivo)      | Habilitado (restritivo)       |
+| Logs               | Console (verbose)        | JSON (info)                  | JSON (warn/error) + APM       |
 
 ### Variaveis de Ambiente (.env)
 
@@ -1051,11 +1047,85 @@ graph LR
 
 ---
 
+## Status de Implementacao — Sprint 1
+
+> Atualizado em 2026-04-04
+
+### Modulos Backend Implementados
+
+| Modulo     | Status       | Controllers                            | Services                                                        | DTOs                                                                      | Guards/Decorators                                                                                                  | Testes                 |
+| ---------- | ------------ | -------------------------------------- | --------------------------------------------------------------- | ------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ | ---------------------- |
+| `auth`     | Implementado | `auth.controller.ts` (4 endpoints)     | `auth.service.ts` (register, login, refresh, logout)            | `register.dto.ts`, `login.dto.ts`, `refresh-token.dto.ts`                 | `jwt-auth.guard.ts`, `jwt-refresh.guard.ts`, `@Public()`                                                           | Unitarios + Integracao |
+| `users`    | Implementado | `users.controller.ts` (3 endpoints)    | `users.service.ts` (findMe, findById, updateMe)                 | `update-user.dto.ts`                                                      | `@CurrentUser()`                                                                                                   | Unitarios              |
+| `families` | Implementado | `families.controller.ts` (3 endpoints) | `families.service.ts` (findMyFamily, updateFamily, listMembers) | `update-family.dto.ts`                                                    | `@CurrentFamily()`                                                                                                 | Unitarios              |
+| `rbac`     | Implementado | `rbac.controller.ts` (6 endpoints)     | `rbac.service.ts` (CRUD grupos, permissoes, seed)               | `create-group.dto.ts`, `update-group.dto.ts`, `assign-permissions.dto.ts` | `permission.guard.ts`, `@CheckPermission()`                                                                        | Unitarios              |
+| `tenant`   | Implementado | -                                      | `tenant.service.ts`                                             | -                                                                         | `tenant.interceptor.ts` (global)                                                                                   | Integracao             |
+| `common`   | Implementado | -                                      | -                                                               | -                                                                         | `http-exception.filter.ts`, `transform.interceptor.ts`, `validation.pipe.ts`, `@CurrentUser()`, `@CurrentFamily()` | -                      |
+
+### Endpoints da API (Sprint 1)
+
+| Metodo | Endpoint                         | Modulo   | Status       |
+| ------ | -------------------------------- | -------- | ------------ |
+| POST   | `/api/v1/auth/register`          | Auth     | Implementado |
+| POST   | `/api/v1/auth/login`             | Auth     | Implementado |
+| POST   | `/api/v1/auth/refresh`           | Auth     | Implementado |
+| POST   | `/api/v1/auth/logout`            | Auth     | Implementado |
+| GET    | `/api/v1/users/me`               | Users    | Implementado |
+| GET    | `/api/v1/users/:id`              | Users    | Implementado |
+| PATCH  | `/api/v1/users/me`               | Users    | Implementado |
+| GET    | `/api/v1/families/me`            | Families | Implementado |
+| PATCH  | `/api/v1/families/me`            | Families | Implementado |
+| GET    | `/api/v1/families/me/members`    | Families | Implementado |
+| GET    | `/api/v1/groups`                 | RBAC     | Implementado |
+| POST   | `/api/v1/groups`                 | RBAC     | Implementado |
+| PATCH  | `/api/v1/groups/:id`             | RBAC     | Implementado |
+| DELETE | `/api/v1/groups/:id`             | RBAC     | Implementado |
+| GET    | `/api/v1/groups/permissions`     | RBAC     | Implementado |
+| PUT    | `/api/v1/groups/:id/permissions` | RBAC     | Implementado |
+
+**Total: 16 endpoints implementados na Sprint 1.**
+
+### Modulos Pendentes (Sprints 2-6)
+
+| Modulo          | Sprint Planejada | Status   |
+| --------------- | ---------------- | -------- |
+| `accounts`      | Sprint 2         | Pendente |
+| `categories`    | Sprint 2         | Pendente |
+| `transactions`  | Sprint 2         | Pendente |
+| `recurring`     | Sprint 3         | Pendente |
+| `budgets`       | Sprint 3         | Pendente |
+| `savings-goals` | Sprint 3         | Pendente |
+| `billing`       | Sprint 4         | Pendente |
+| `invites`       | Sprint 4         | Pendente |
+| `dashboard`     | Sprint 5         | Pendente |
+| `notifications` | Sprint 5         | Pendente |
+
+### Infraestrutura Implementada (Sprint 0 + 1)
+
+| Item                                        | Status       |
+| ------------------------------------------- | ------------ |
+| Monorepo Turborepo + npm workspaces         | Implementado |
+| NestJS scaffold + modulos base              | Implementado |
+| Vue.js + Quasar scaffold                    | Implementado |
+| Pacote `@raji/shared`                       | Implementado |
+| Prisma schema (20+ models)                  | Implementado |
+| Seed de permissoes e dados iniciais         | Implementado |
+| Docker Compose (PostgreSQL)                 | Implementado |
+| CI/CD GitHub Actions                        | Implementado |
+| ESLint + Prettier + Husky + Commitlint      | Implementado |
+| Swagger UI (`/api/docs`)                    | Implementado |
+| JWT Auth (access + refresh com rotacao)     | Implementado |
+| Multi-tenancy (Tenant Interceptor)          | Implementado |
+| RBAC 4 camadas (backend + frontend)         | Implementado |
+| Response padronizado (TransformInterceptor) | Implementado |
+| Validacao global (ValidationPipe)           | Implementado |
+
+---
+
 ## Proximos Passos
 
-1. **Sprint 1:** Implementar `auth`, `users`, `families`, `rbac`, `tenant` (caminho critico)
-2. **Sprint 2:** `accounts`, `categories`, `transactions` (core financeiro)
-3. **Sprint 3:** `recurring`, `budgets`, `savings-goals` (features financeiras)
-4. **Sprint 4:** `billing`, `invites` (monetizacao)
-5. **Sprint 5:** `dashboard`, `notifications` (experiencia)
-6. **Sprint 6:** Importacao CSV/OFX, refinamentos, testes E2E
+1. **Sprint 2:** Implementar `accounts`, `categories`, `transactions` (core financeiro)
+2. **Sprint 3:** Implementar `recurring`, `budgets`, `savings-goals` (features financeiras)
+3. **Sprint 4:** Implementar `billing`, `invites` (monetizacao)
+4. **Sprint 5:** Implementar `dashboard`, `notifications` (experiencia)
+5. **Sprint 6:** Importacao CSV/OFX, refinamentos, testes E2E, deploy producao
