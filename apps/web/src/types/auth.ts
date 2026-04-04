@@ -1,57 +1,57 @@
 export interface User {
-  id: string
-  email: string
-  name: string
-  avatarUrl: string | null
-  familyId: string
-  groupId: string
-  isFamilyOwner: boolean
+  id: string;
+  email: string;
+  name: string;
+  avatarUrl: string | null;
+  familyId: string;
+  groupId: string;
+  isFamilyOwner: boolean;
 }
 
 export interface LoginDto {
-  email: string
-  password: string
+  email: string;
+  password: string;
 }
 
 export interface RegisterDto {
-  name: string
-  email: string
-  password: string
-  familyName: string
+  name: string;
+  email: string;
+  password: string;
+  familyName: string;
 }
 
 export interface AuthResponse {
-  accessToken: string
-  refreshToken: string
-  user: User
-  permissions?: Permission[]
+  accessToken: string;
+  refreshToken: string;
+  user: User;
+  permissions?: (string | Permission)[];
 }
 
 export interface RefreshResponse {
-  accessToken: string
-  refreshToken: string
+  accessToken: string;
+  refreshToken: string;
 }
 
 export interface Permission {
-  module: string
-  action: string
+  module: string;
+  action: string;
 }
 
 export interface ApiResponse<T> {
-  success: boolean
-  data: T
+  success: boolean;
+  data: T;
   meta?: {
-    page: number
-    perPage: number
-    total: number
-  }
+    page: number;
+    perPage: number;
+    total: number;
+  };
 }
 
 export interface ApiError {
-  success: false
+  success: false;
   error: {
-    code: string
-    message: string
-    details?: unknown
-  }
+    code: string;
+    message: string;
+    details?: unknown;
+  };
 }
