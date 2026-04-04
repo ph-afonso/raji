@@ -38,6 +38,7 @@
       "prettier --write"
     ]
   },
+  "packageManager": "npm@11.9.0",
   "engines": {
     "node": ">=20.0.0",
     "npm": ">=10.0.0"

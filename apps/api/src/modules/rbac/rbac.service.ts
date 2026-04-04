@@ -4,16 +4,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '@/prisma/prisma.service';
 
-/**
- * Definicoes das permissoes por modulo do sistema.
- * Reutilizado do seed.ts para manter consistencia.
- */
-interface PermissionDef {
-  module: string;
-  action: string;
-  description: string;
-}
-
 @Injectable()
 export class RbacService {
   constructor(private readonly prisma: PrismaService) {}
@@ -22,11 +12,7 @@ export class RbacService {
    * Verifica se o grupo do usuario tem a permissao especificada.
    * Retorna true se o grupo possui a permissao module:action.
    */
-  async userHasPermission(
-    groupId: string,
-    module: string,
-    action: string,
-  ): Promise<boolean> {
+  async userHasPermission(groupId: string, module: string, action: string): Promise<boolean> {
     const count = await this.prisma.groupPermission.count({
       where: {
         groupId,
@@ -53,7 +39,11 @@ export class RbacService {
       },
     });
 
-    return groupPermissions.map((gp) => gp.permission);
+    return groupPermissions.map(
+      (gp: {
+        permission: { id: string; module: string; action: string; description: string | null };
+      }) => gp.permission,
+    );
   }
 
   /**
@@ -97,10 +87,7 @@ export class RbacService {
   /**
    * Cria um grupo customizado para uma familia.
    */
-  async createGroup(
-    familyId: string,
-    data: { name: string; slug: string; description?: string },
-  ) {
+  async createGroup(familyId: string, data: { name: string; slug: string; description?: string }) {
     return this.prisma.group.create({
       data: {
         name: data.name,
@@ -169,11 +156,7 @@ export class RbacService {
   /**
    * Atualiza as permissoes de um grupo (substitui todas).
    */
-  async updateGroupPermissions(
-    groupId: string,
-    familyId: string,
-    permissionIds: string[],
-  ) {
+  async updateGroupPermissions(groupId: string, familyId: string, permissionIds: string[]) {
     const group = await this.prisma.group.findFirst({
       where: { id: groupId, familyId },
     });
@@ -218,9 +201,7 @@ export class RbacService {
     }
 
     const getPermIds = (keys: string[]): string[] => {
-      return keys
-        .map((k) => permMap.get(k))
-        .filter((id): id is string => id !== undefined);
+      return keys.map((k) => permMap.get(k)).filter((id): id is string => id !== undefined);
     };
 
     // --- Grupo MASTER: todas as permissoes ---
@@ -236,7 +217,7 @@ export class RbacService {
     });
 
     await this.prisma.groupPermission.createMany({
-      data: allPermissions.map((p) => ({
+      data: allPermissions.map((p: { id: string }) => ({
         groupId: masterGroup.id,
         permissionId: p.id,
       })),
@@ -255,14 +236,33 @@ export class RbacService {
     });
 
     const memberFullPermKeys = [
-      'accounts:create', 'accounts:read', 'accounts:update', 'accounts:delete',
-      'transactions:create', 'transactions:read', 'transactions:update', 'transactions:delete',
-      'categories:create', 'categories:read', 'categories:update', 'categories:delete',
-      'budgets:create', 'budgets:read', 'budgets:update', 'budgets:delete',
-      'savings_goals:create', 'savings_goals:read', 'savings_goals:update', 'savings_goals:delete',
-      'recurring:create', 'recurring:read', 'recurring:update', 'recurring:delete',
+      'accounts:create',
+      'accounts:read',
+      'accounts:update',
+      'accounts:delete',
+      'transactions:create',
+      'transactions:read',
+      'transactions:update',
+      'transactions:delete',
+      'categories:create',
+      'categories:read',
+      'categories:update',
+      'categories:delete',
+      'budgets:create',
+      'budgets:read',
+      'budgets:update',
+      'budgets:delete',
+      'savings_goals:create',
+      'savings_goals:read',
+      'savings_goals:update',
+      'savings_goals:delete',
+      'recurring:create',
+      'recurring:read',
+      'recurring:update',
+      'recurring:delete',
       'reports:read',
-      'notifications:read', 'notifications:manage',
+      'notifications:read',
+      'notifications:manage',
     ];
 
     await this.prisma.groupPermission.createMany({

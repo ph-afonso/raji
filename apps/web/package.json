@@ -19,12 +19,12 @@
     "vue-router": "^4.4.0",
     "pinia": "^2.2.0",
     "axios": "^1.7.0",
-    "apexcharts": "^4.1.0",
+    "apexcharts": "^5.10.0",
     "vue3-apexcharts": "^1.7.0",
     "@raji/shared": "*"
   },
   "devDependencies": {
-    "@quasar/app-vite": "^2.0.0",
+    "@quasar/app-vite": "~2.1.0",
     "@quasar/quasar-app-extension-testing-unit-vitest": "^1.0.0",
     "typescript": "^5.7.0",
     "vite": "^6.0.0",

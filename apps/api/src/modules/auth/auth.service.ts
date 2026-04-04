@@ -1,13 +1,9 @@
 // modules/auth/auth.service.ts
 // Service de autenticacao — registro, login, refresh token, logout
 
-import {
-  Injectable,
-  ConflictException,
-  UnauthorizedException,
-  BadRequestException,
-  Logger,
-} from '@nestjs/common';
+import * as crypto from 'crypto';
+
+import { Injectable, ConflictException, UnauthorizedException, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '@/prisma/prisma.service';
@@ -143,12 +139,7 @@ export class AuthService {
     }
 
     // 4. Gerar tokens
-    const tokens = await this.generateTokens(
-      user.id,
-      user.email,
-      user.familyId,
-      user.groupId,
-    );
+    const tokens = await this.generateTokens(user.id, user.email, user.familyId, user.groupId);
 
     // 5. Salvar refresh token
     await this.saveRefreshToken(
@@ -180,7 +171,9 @@ export class AuthService {
           slug: user.group.slug,
         },
       },
-      permissions: permissions.map((p) => `${p.module}:${p.action}`),
+      permissions: permissions.map(
+        (p: { module: string; action: string }) => `${p.module}:${p.action}`,
+      ),
     };
   }
 
@@ -194,7 +187,7 @@ export class AuthService {
    * 6. Salva novo refresh token
    * 7. Retorna novos tokens
    */
-  async refreshToken(userId: string, tokenId: string, rawRefreshToken: string) {
+  async refreshToken(userId: string, tokenId: string, _rawRefreshToken: string) {
     // 1. Buscar refresh token no DB
     const storedToken = await this.prisma.refreshToken.findUnique({
       where: { id: tokenId },
@@ -239,12 +232,7 @@ export class AuthService {
 
     // 5. Gerar novo par de tokens
     const user = storedToken.user;
-    const tokens = await this.generateTokens(
-      user.id,
-      user.email,
-      user.familyId,
-      user.groupId,
-    );
+    const tokens = await this.generateTokens(user.id, user.email, user.familyId, user.groupId);
 
     // 6. Salvar novo refresh token
     await this.saveRefreshToken(user.id, tokens.refreshTokenId, tokens.refreshToken);
@@ -292,7 +280,7 @@ export class AuthService {
       select: { id: true },
     });
 
-    const userIds = familyUsers.map((u) => u.id);
+    const userIds = familyUsers.map((u: { id: string }) => u.id);
 
     await this.prisma.refreshToken.updateMany({
       where: { userId: { in: userIds }, isRevoked: false },
@@ -324,12 +312,7 @@ export class AuthService {
   /**
    * Gera par de tokens (access + refresh).
    */
-  private async generateTokens(
-    userId: string,
-    email: string,
-    familyId: string,
-    groupId: string,
-  ) {
+  private async generateTokens(userId: string, email: string, familyId: string, groupId: string) {
     // ID unico para o refresh token (sera persistido no DB)
     const refreshTokenId = crypto.randomUUID();
 
@@ -356,9 +339,7 @@ export class AuthService {
           type: 'refresh',
         },
         {
-          secret:
-            process.env.JWT_REFRESH_SECRET ||
-            'raji-dev-refresh-secret-change-in-prod',
+          secret: process.env.JWT_REFRESH_SECRET || 'raji-dev-refresh-secret-change-in-prod',
           expiresIn: '7d',
         },
       ),
