@@ -64,12 +64,10 @@
         </template>
 
         <!-- Toggle "Liberar módulo inteiro" -->
-        <q-item class="bg-primary text-white">
+        <q-item>
           <q-item-section>
-            <q-item-label class="text-weight-bold text-white">
-              Liberar módulo inteiro?
-            </q-item-label>
-            <q-item-label class="text-blue-2">
+            <q-item-label class="text-weight-bold"> Liberar módulo inteiro? </q-item-label>
+            <q-item-label caption>
               Ativa ou desativa todas as permissões deste módulo de uma vez
             </q-item-label>
           </q-item-section>
@@ -77,8 +75,7 @@
             <q-toggle
               :model-value="isModuleFullyChecked(mod)"
               :disable="isMasterGroup"
-              color="amber"
-              keep-color
+              color="primary"
               @update:model-value="toggleModule(mod)"
             />
           </q-item-section>
