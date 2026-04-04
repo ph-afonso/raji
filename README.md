@@ -49,19 +49,9 @@ raji-finance/
 
 ## Documentacao
 
-Consulte o [indice completo da documentacao](docs/README.md) para navegar todos os documentos.
+Toda a documentacao tecnica do projeto esta organizada em [`docs/`](docs/README.md), com indice completo e metodologia de organizacao.
 
-| Documento                                            | Descricao                               |
-| ---------------------------------------------------- | --------------------------------------- |
-| [Briefing](docs/product/briefing.md)                 | Visao geral do produto e requisitos     |
-| [Arquitetura](docs/architecture/architecture.md)     | Arquitetura tecnica, modulos, diagramas |
-| [Schema Prisma](docs/architecture/prisma-schema.md)  | Modelo de dados completo (20 tabelas)   |
-| [ADRs](docs/architecture/adrs.md)                    | Decisoes arquiteturais documentadas     |
-| [API Reference](docs/api/api-reference.md)           | Referencia completa dos endpoints       |
-| [Getting Started](docs/guides/getting-started.md)    | Setup e primeiros passos                |
-| [Sprint Planning](docs/planning/sprint-planning.md)  | Planejamento de sprints e backlog       |
-| [Seguranca Sprint 1](docs/security/sprint1-audit.md) | Auditoria de seguranca                  |
-| [Release v0.1.0](docs/releases/v0.1.0.md)            | Release notes                           |
+**Links rapidos:** [Getting Started](docs/guides/getting-started.md) | [API Reference](docs/api/api-reference.md) | [Arquitetura](docs/architecture/architecture.md)
 
 ## Padrao de Commits
 
