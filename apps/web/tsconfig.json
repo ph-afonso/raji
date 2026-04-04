@@ -20,7 +20,8 @@
       "src/*": ["src/*"],
       "@/*": ["src/*"]
     },
-    "types": ["quasar", "vite/client"]
+    "types": ["quasar", "vite/client"],
+    "typeRoots": ["./node_modules/@types", "../../node_modules/@types", "../../node_modules"]
   },
   "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.vue"],
   "exclude": ["node_modules", "dist"]
