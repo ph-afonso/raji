@@ -34,14 +34,34 @@ export class RbacService {
       where: { groupId },
       include: {
         permission: {
-          select: { id: true, module: true, action: true, description: true },
+          select: {
+            id: true,
+            module: true,
+            action: true,
+            description: true,
+            moduleLabel: true,
+            moduleDescription: true,
+            moduleIcon: true,
+            actionLabel: true,
+            detailedDescription: true,
+          },
         },
       },
     });
 
     return groupPermissions.map(
       (gp: {
-        permission: { id: string; module: string; action: string; description: string | null };
+        permission: {
+          id: string;
+          module: string;
+          action: string;
+          description: string | null;
+          moduleLabel: string | null;
+          moduleDescription: string | null;
+          moduleIcon: string | null;
+          actionLabel: string | null;
+          detailedDescription: string | null;
+        };
       }) => gp.permission,
     );
   }

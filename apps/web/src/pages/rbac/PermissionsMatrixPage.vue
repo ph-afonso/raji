@@ -36,18 +36,18 @@
       <q-expansion-item
         v-for="mod in modules"
         :key="mod"
-        :icon="moduleIcons[mod] || 'folder'"
+        :icon="getModuleIcon(mod)"
         header-class="text-weight-medium"
         expand-icon-class="text-primary"
       >
         <!-- Header customizado com label + ? + caption -->
         <template #header>
           <q-item-section avatar>
-            <q-icon :name="moduleIcons[mod] || 'folder'" />
+            <q-icon :name="getModuleIcon(mod)" />
           </q-item-section>
           <q-item-section>
             <q-item-label class="row items-center q-gutter-xs">
-              <span class="text-weight-medium">{{ tModule(mod) }}</span>
+              <span class="text-weight-medium">{{ getModuleLabel(mod) }}</span>
               <q-btn flat round dense size="xs" icon="help_outline" color="grey" @click.stop>
                 <q-tooltip
                   class="bg-grey-9 text-body2"
@@ -141,12 +141,6 @@ import { ref, computed, onMounted } from 'vue';
 import { useQuasar } from 'quasar';
 import rbacService from 'src/services/rbac.service';
 import type { Group, PermissionDef } from 'src/types/rbac';
-import {
-  tModule,
-  tAction,
-  moduleDescriptions,
-  actionDescriptionsByModule,
-} from 'src/utils/translations';
 
 const $q = useQuasar();
 
@@ -156,21 +150,6 @@ const selectedGroupId = ref<string | null>(null);
 const currentPermissionKeys = ref<Set<string>>(new Set());
 const loading = ref(false);
 const saving = ref(false);
-
-const moduleIcons: Record<string, string> = {
-  accounts: 'account_balance',
-  transactions: 'receipt_long',
-  categories: 'category',
-  budgets: 'savings',
-  savings_goals: 'flag',
-  recurring: 'autorenew',
-  family: 'home',
-  members: 'people',
-  groups: 'admin_panel_settings',
-  billing: 'credit_card',
-  reports: 'assessment',
-  notifications: 'notifications',
-};
 
 const groupOptions = computed(() => groups.value.map((g) => ({ label: g.name, value: g.id })));
 
@@ -199,33 +178,53 @@ function getModuleActions(mod: string): string[] {
   return moduleActionsMap.value.get(mod) || [];
 }
 
+/** Busca a primeira permissao do modulo para extrair metadados */
+function findModulePermission(mod: string): PermissionDef | undefined {
+  return allPermissions.value.find((p) => p.module === mod);
+}
+
+/** Busca uma permissao especifica */
+function findPermission(mod: string, action: string): PermissionDef | undefined {
+  return allPermissions.value.find((p) => p.module === mod && p.action === action);
+}
+
+function getModuleLabel(mod: string): string {
+  return (
+    findModulePermission(mod)?.moduleLabel ||
+    mod.charAt(0).toUpperCase() + mod.slice(1).replace(/_/g, ' ')
+  );
+}
+
+function getModuleIcon(mod: string): string {
+  return findModulePermission(mod)?.moduleIcon || 'folder';
+}
+
 function getModuleDescription(mod: string): string {
-  return moduleDescriptions[mod] || `Módulo de ${tModule(mod).toLowerCase()} do sistema.`;
+  return (
+    findModulePermission(mod)?.moduleDescription ||
+    `Módulo de ${getModuleLabel(mod).toLowerCase()} do sistema.`
+  );
+}
+
+function getActionLabel(mod: string, action: string): string {
+  return (
+    findPermission(mod, action)?.actionLabel ||
+    action.charAt(0).toUpperCase() + action.slice(1).replace(/_/g, ' ')
+  );
 }
 
 function getActionDescription(mod: string, action: string): string {
   return (
-    actionDescriptionsByModule[mod]?.[action] ||
-    `Permite ${tAction(action).toLowerCase()} ${tModule(mod).toLowerCase()} no sistema.`
+    findPermission(mod, action)?.detailedDescription ||
+    `Permite ${getActionLabel(mod, action).toLowerCase()} ${getModuleLabel(mod).toLowerCase()} no sistema.`
   );
 }
 
-// Gera descrições como "Permitir criar contas?"
+// Gera descrições como "Permitir Criar Contas?"
 function actionDescription(mod: string, action: string): string {
-  const moduleName = tModule(mod).toLowerCase();
-  const actionPrefixes: Record<string, string> = {
-    create: 'Permitir criar',
-    read: 'Permitir visualizar',
-    update: 'Permitir editar',
-    delete: 'Permitir excluir',
-    import: 'Permitir importar',
-    invite: 'Permitir convidar',
-    remove: 'Permitir remover',
-    change_group: 'Permitir alterar grupo de',
-    manage: 'Permitir gerenciar',
-  };
-  const prefix = actionPrefixes[action] || `Permitir ${tAction(action).toLowerCase()}`;
-  return `${prefix} ${moduleName}?`;
+  const aLabel = getActionLabel(mod, action);
+  const mLabel = getModuleLabel(mod).toLowerCase();
+  return `Permitir ${aLabel.toLowerCase()} ${mLabel}?`;
 }
 
 function moduleCaption(mod: string): string {

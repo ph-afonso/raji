@@ -124,11 +124,16 @@ model Group {
 /// Tabela global (nao pertence a nenhuma familia).
 /// Populada via seed. Nao editavel pelo usuario.
 model Permission {
-  id          String   @id @default(uuid())
-  module      String   /// Modulo (ex: "transactions", "accounts", "billing")
-  action      String   /// Acao (ex: "create", "read", "update", "delete", "import")
-  description String?  /// Descricao legivel (ex: "Criar transacoes")
-  createdAt   DateTime @default(now())
+  id                  String   @id @default(uuid())
+  module              String   /// Modulo (ex: "transactions", "accounts", "billing")
+  action              String   /// Acao (ex: "create", "read", "update", "delete", "import")
+  description         String?  /// Descricao legivel (ex: "Criar transacoes")
+  moduleLabel         String?  @map("module_label")         /// Nome traduzido do modulo (ex: "Contas")
+  moduleDescription   String?  @map("module_description")   /// Descricao detalhada do modulo
+  moduleIcon          String?  @map("module_icon")          /// Icone Material do modulo (ex: "account_balance")
+  actionLabel         String?  @map("action_label")         /// Nome traduzido da acao (ex: "Criar")
+  detailedDescription String?  @map("detailed_description") /// Descricao detalhada da permissao (tooltip)
+  createdAt           DateTime @default(now())
 
   // Relacionamentos
   groupPermissions GroupPermission[]
